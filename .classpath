@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="p2site"/>
+	<classpathentry kind="src" path="bundles/org.eclipse.ui.pki/src"/>
+	<classpathentry kind="src" path="bundles/org.eclipse.core.pki/src"/>
+	<classpathentry kind="src" path="features"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="output" path="tests/org.eclipse.core.tests.pki/src/org/eclipse/core/pki"/>
+</classpath>

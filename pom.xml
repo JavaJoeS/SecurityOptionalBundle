@@ -1,0 +1,244 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.eclipse</groupId>
+	<artifactId>securityoption</artifactId>
+	<version>0.0.1${revision}</version>
+
+	<properties>
+		<tycho.version>4.0.8</tycho.version>
+		<top.dir>${maven.multiModuleProjectDirectory}</top.dir>
+		<!--<p2.repository>${top.dir}/updatesite/target/repository</p2.repository>-->
+		<tycho.buildqualifier.format>yyyyMMddHHmm</tycho.buildqualifier.format>
+		<maven.compiler.release>17</maven.compiler.release>
+		<eclipse-version>2024-09</eclipse-version>
+		<eclipse.repo>https://download.eclipse.org/releases/${eclipse-version}</eclipse.repo>
+		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+
+		<revision>${revisionSnapshot}</revision>
+
+	</properties>
+
+
+	<repositories>
+		<repository>
+			<id>eclipse-project-orbit</id>
+			<layout>p2</layout>
+			<url>
+				https://download.eclipse.org/tools/orbit/downloads/drops/R20230531010532/repository</url>
+		</repository>
+		<repository>
+			<id>eclipse-project-updates</id>
+			<layout>p2</layout>
+			<url>https://download.eclipse.org/eclipse/updates/4.34</url>
+		</repository>
+		<repository>
+			<id>eclipse-project-2024-12</id>
+			<layout>p2</layout>
+			<url>https://download.eclipse.org/releases/2024-12</url>
+		</repository>
+
+		<!--<repository>
+			<id>eclipse</id>
+			<url>${eclipse.repo}</url>
+			<layout>p2</layout>
+		</repository>-->
+	</repositories>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-versions-plugin</artifactId>
+					<version>${tycho.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-director-plugin</artifactId>
+					<version>${tycho.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>3.1.3</version>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-versions-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>versions</id>
+						<phase>validate</phase>
+						<goals>
+							<!--							<goal>set-parent-version</goal>-->
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.10</version>
+				<executions>
+					<execution>
+						<id>timestamp-property</id>
+						<goals>
+							<goal>timestamp-property</goal>
+						</goals>
+						<configuration>
+							<name>build.time</name>
+							<pattern>MM/dd/yyyy hh:mm aa</pattern>
+							<locale>en_US</locale>
+							<timeZone>America/New York</timeZone>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>3.1.3</version>
+				<configuration>
+					<!--<skip>true</skip>-->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<extensions>true</extensions>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-repository-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<includeAllDependencies>true</includeAllDependencies>
+					<createArtifactRepository>true</createArtifactRepository>
+					<compress>true</compress>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<pomDependencies>consider</pomDependencies>
+					<dependency-resolution>
+						<extraRequirements>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.hamcrest</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+					<target>
+						<artifact>
+							<groupId>org.eclipse.core.pki</groupId>
+							<artifactId>target-platform</artifactId>
+							<version>1.0.3-SNAPSHOT</version>
+						</artifact>
+					</target>
+					<environments>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86_64</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-packaging-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<id>package-features-qualify</id>
+						<configuration>
+							<strictBinIncludes>true</strictBinIncludes>
+							<format>${tycho.buildqualifier.format}</format>
+							<finalName>
+								${project.artifactId}_${unqualifiedVersion}.${buildQualifier}</finalName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+
+	<packaging>pom</packaging>
+
+	<modules>
+
+		<module>bundles</module>
+<!--		
+		<module>features</module>
+		<module>p2site</module>
+		<module>tests</module>
+-->
+	</modules>
+
+	<profiles>
+		<profile>
+			<id>default-snapshot</id>
+			<!--
+			<modules>
+				<module>p2site</module>
+			</modules>
+			-->
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<snapshot>SNAPSHOT</snapshot>
+				<revisionSnapshot>-SNAPSHOT</revisionSnapshot>
+			</properties>
+		</profile>
+		<profile>
+			<id>release</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<snapshot></snapshot>
+				<revisionSnapshot></revisionSnapshot>
+			</properties>
+		</profile>
+	</profiles>
+
+</project>
