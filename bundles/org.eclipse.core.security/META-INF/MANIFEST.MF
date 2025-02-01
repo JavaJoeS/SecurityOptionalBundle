@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: PKI Core
+Bundle-Name: Security Option
 Bundle-Localization: plugin
 Bundle-ClassPath: ., org.eclipse.core.pki
 Bundle-SymbolicName: org.eclipse.core.pki; singleton:=true
