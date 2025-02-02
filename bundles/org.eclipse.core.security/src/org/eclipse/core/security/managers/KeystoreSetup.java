@@ -11,7 +11,7 @@
  * Contributors:
  *     Eclipse Platform - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.pki.auth;
+package org.eclipse.core.security.managers;
 
 
 import java.util.Optional;

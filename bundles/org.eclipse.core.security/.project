@@ -10,7 +10,7 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
-			<buildCommand>
+		<buildCommand>
 			<name>org.eclipse.pde.ManifestBuilder</name>
 			<arguments>
 			</arguments>

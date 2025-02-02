@@ -60,14 +60,17 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-public class PKISetup implements BundleActivator, IStartup {
+public class ActivateSecurity implements BundleActivator, IStartup {
 	public static final String ID = "org.eclipse.core.pki"; //$NON-NLS-1$
 	protected final String pin = "#Gone2Boat@Bay"; //$NON-NLS-1$
 	private static ActivateSecurity instance;
+	
+	
 	static boolean isPkcs11Installed = false;
 	static boolean isKeyStoreLoaded = false;
 	private BundleContext context;
 	SSLContext sslContext = null;
+	
 	private static final ServiceCaller<ILog> logger = new ServiceCaller(PKISetup.class, ILog.class);
 	protected static KeyStore keyStore = null;
 	PKIProperties pkiInstance = null;
@@ -117,8 +120,8 @@ public class PKISetup implements BundleActivator, IStartup {
 		Optional<String> type = null;
 		Optional<String> decryptedPw;
 
-		PKIState.CONTROL.setPKCS11on(false);
-		PKIState.CONTROL.setPKCS12on(false);
+		X509SecurityState.CONTROL.setPKCS11on(false);
+		X509SecurityState.CONTROL.setPKCS12on(false);
 		/*
 		 * First see if parameters were passed into eclipse via the command line -D
 		 */

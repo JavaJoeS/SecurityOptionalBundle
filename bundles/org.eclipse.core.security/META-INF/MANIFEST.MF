@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Security Option
 Bundle-Localization: plugin
-Bundle-ClassPath: ., org.eclipse.core.pki
-Bundle-SymbolicName: org.eclipse.core.pki; singleton:=true
+Bundle-ClassPath: ., org.eclipse.core.security
+Bundle-SymbolicName: org.eclipse.core.security; singleton:=true
 Require-Bundle: org.eclipse.equinox.common;bundle-version="3.12.0",
  org.eclipse.ui.workbench,
  org.eclipse.ui,
@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.equinox.common;bundle-version="3.12.0",
  org.eclipse.core.runtime
 Bundle-Version: 1.0.3.qualifier
 Bundle-Activator: org.eclipse.core.pki.auth.PKISetup
-Export-Package: org.eclipse.core.pki;version="0.0.0",
+Export-Package: org.eclipse.core.security;version="0.0.0",
  org.eclipse.core.pki.auth;version="0.0.0",
  org.eclipse.core.pki.pkiselection;version="0.0.0",
  org.eclipse.core.pki.util;version="0.0.0",
@@ -24,5 +24,5 @@ Import-Package: org.eclipse.core.internal.net,
  org.eclipse.jface.dialogs,
  org.osgi.framework;resolution:=optional
 Bundle-Vendor: Delmarva Security
-Automatic-Module-Name: org.eclipse.core.pki
+Automatic-Module-Name: org.eclipse.core.security
 Bundle-ActivationPolicy: lazy
