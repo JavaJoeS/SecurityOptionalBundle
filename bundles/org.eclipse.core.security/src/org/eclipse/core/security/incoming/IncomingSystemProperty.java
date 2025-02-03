@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2025 Eclipse Platform, Security Group and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,15 +9,13 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- * IBM Corporation - initial API and implementation
+ *     Eclipse Platform - initial API and implementation
  *******************************************************************************/
 package org.eclipse.core.security.incoming;
 
 import java.util.Optional;
-
-import org.eclipse.core.pki.util.LogUtil;
-import org.eclipse.core.pki.util.NormalizeGCM;
 import org.eclipse.core.security.ActivateSecurity;
+import org.eclipse.core.security.encryption.NormalizeGCM;
 import org.eclipse.core.security.state.X509SecurityState;
 
 public class IncomingSystemProperty {
@@ -74,7 +72,7 @@ public class IncomingSystemProperty {
 			} else {
 				if (PasswordEncrypted.get().toString().equalsIgnoreCase("true")) { //$NON-NLS-1$
 					salt = new String(System.getProperty("user.name") + pin).getBytes(); //$NON-NLS-1$
-					String passwd = NormalizeGCM.DECRYPT.decrypt(keyStorePassword.get().toString(), pin,
+					String passwd = NormalizeGCM.getInstance().decrypt(keyStorePassword.get().toString(), pin,
 							new String(salt));
 					System.setProperty("javax.net.ssl.keyStorePassword", passwd); //$NON-NLS-1$
 				}

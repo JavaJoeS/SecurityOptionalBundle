@@ -31,7 +31,7 @@
 		<repository>
 			<id>eclipse-project-updates</id>
 			<layout>p2</layout>
-			<url>https://download.eclipse.org/eclipse/updates/4.34</url>
+			<url>https://download.eclipse.org/eclipse/updates/4.35</url>
 		</repository>
 		<repository>
 			<id>eclipse-project-2024-12</id>
@@ -145,7 +145,7 @@
 					</dependency-resolution>
 					<target>
 						<artifact>
-							<groupId>org.eclipse.core.pki</groupId>
+							<groupId>org.eclipse.core.security</groupId>
 							<artifactId>target-platform</artifactId>
 							<version>1.0.3-SNAPSHOT</version>
 						</artifact>

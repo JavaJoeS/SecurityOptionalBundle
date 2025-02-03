@@ -23,8 +23,6 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import org.eclipse.core.pki.pkiselection.PKIProperties;
-import org.eclipse.core.pki.util.LogUtil;
 
 
 public class EclipseKeyStoreCollection {

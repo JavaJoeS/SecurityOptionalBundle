@@ -24,9 +24,9 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.SwingConstants;
 
-import org.eclipse.core.pki.auth.PublishPasswordUpdate;
-import org.eclipse.core.pki.util.KeyStoreFormat;
-import org.eclipse.core.pki.util.KeyStoreManager;
+import org.eclipse.core.security.managers.KeyStoreManager;
+import org.eclipse.core.security.util.KeyStoreFormat;
+
 
 public class PkiPasswordGrabberWidget {
 	JFrame frame = null;
@@ -56,7 +56,6 @@ public class PkiPasswordGrabberWidget {
 			
 			icon = new ImageIcon(getClass().getResource("/icons/icons8-password-48.png"));//$NON-NLS-1$
 		} catch (Exception iconErr) {
-			//iconErr.printStackTrace();
 		}
 
 		panel.requestFocus();
@@ -83,17 +82,16 @@ public class PkiPasswordGrabberWidget {
 				System.setProperty("javax.net.ssl.keyStorePassword", pw); //$NON-NLS-1$
 
 				keystoreContainer = Optional
-						.ofNullable(KeyStoreManager.INSTANCE.getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
+						.ofNullable(KeyStoreManager.getInstance().getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
 								System.getProperty("javax.net.ssl.keyStorePassword"), //$NON-NLS-1$
 								KeyStoreFormat.valueOf(System.getProperty("javax.net.ssl.keyStoreType")))); //$NON-NLS-1$
-				if ((keystoreContainer.isEmpty()) || (!(KeyStoreManager.INSTANCE.isKeyStoreInitialized()))) {
+				if ((keystoreContainer.isEmpty()) || (!(KeyStoreManager.getInstance().isKeyStoreInitialized()))) {
 					JOptionPane.showMessageDialog(null,"Incorrect Password",null,
 	                        JOptionPane.ERROR_MESSAGE);//$NON-NLS-1$
 					System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
 					pword.setText("");//$NON-NLS-1$
 				} else {
-					//System.out.println("Your password is GOOD");
-					PublishPasswordUpdate.INSTANCE.publishMessage(pw);
+					PublishPasswordUpdate.getInstance().publishMessage(pw);
 					break;
 				}
 			} else {
