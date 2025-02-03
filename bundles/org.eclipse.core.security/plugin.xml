@@ -15,22 +15,10 @@
  -->
 
 <plugin 
-	id="org.eclipse.core.pki.id" 
-	name="Eclipse Core PKI"
+	id="org.eclipse.core.security.id" 
+	name="Eclipse Core PKI security"
     version="1.0.3.qualifier">	
 	<extension point="org.eclipse.ui.startup">
-		<startup class="org.eclipse.core.pki.auth.PKISetup"/>
+		<startup class="org.eclipse.core.security.ActivateSecurity"/>
 	</extension>
-	<!--
-	<extension
-       id="PASSWD_LOCK_ID"
-       point="org.eclipse.core.runtime.products">
-    	<product
-          application="MarketplacePKI.product1"
-          description="Lock Image file"
-          icon="platform:/plugin/org.eclipse.core.pki/icons/icons8-password-48.png"
-          name="PasswordLock">  
-    	</product>
- 	</extension>
-	-->
 </plugin>

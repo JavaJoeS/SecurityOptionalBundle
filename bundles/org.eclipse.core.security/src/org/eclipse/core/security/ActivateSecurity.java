@@ -57,14 +57,11 @@ import org.osgi.framework.BundleContext;
 
 public class ActivateSecurity implements BundleActivator, IStartup {
 	public static final String ID = "org.eclipse.core.security"; //$NON-NLS-1$
-	protected final String pin = "#Gone2Boat@Bay"; //$NON-NLS-1$
 	private static ActivateSecurity instance;
-	
-	
 	static boolean isPkcs11Installed = false;
 	public static boolean isKeyStoreLoaded = false;
 	private BundleContext context;
-	SSLContext sslContext = null;
+	protected SSLContext sslContext;
 	
 	private static final ServiceCaller<ILog> logger = new ServiceCaller(ActivateSecurity.class, ILog.class);
 	protected static KeyStore keyStore = null;
@@ -82,7 +79,7 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		this.context = context;
+		ActivateSecurity.getInstance().context=context;
 		Startup();
 	}
 	@Override 
@@ -111,12 +108,9 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 		/*
 		 * Initialize preliminary PKCS settings
 		 */
-		Optional<String> type = null;
-		Optional<String> decryptedPw;
 		X509SecurityState.getInstance().setPKCS11on(false);
 		X509SecurityState.getInstance().setPKCS12on(false);
 		InBoundController.getInstance().controller();
-		
 	}
 
 	public SSLContext getSSLContext() {
@@ -143,7 +137,7 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 		}
 	}
 
-	private void setupAdapter() {
+	public void setupAdapter() {
 	
 		IAdapterFactory pr = new IAdapterFactory() {
 	        @Override
@@ -155,7 +149,7 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 					IResource res = (IResource) adaptableObject;
 					SSLContext v = null;
-					QualifiedName key = new QualifiedName("org.eclipse.core.pki", "context");//$NON-NLS-1$
+					QualifiedName key = new QualifiedName("org.eclipse.core.security", "context");//$NON-NLS-1$
 					try {
 						v = (SSLContext) res.getSessionProperty(key);
 						if (v == null) {

@@ -38,14 +38,14 @@ public class InBoundController {
 	}
 
 	public void controller() {
-		Optional<String> type = null;
+		Optional<String> keystoreTypeContainer = null;
 		Optional<String> decryptedPw;
 		/*
 		 * First see if parameters were passed into eclipse via the command line -D
 		 */
-		type = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
+		keystoreTypeContainer = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
 
-		if (type.isEmpty()) {
+		if (keystoreTypeContainer.isEmpty()) {
 			//
 			// Incoming parameter as -DkeystoreType was empty so CHECK in .pki file
 			//

@@ -97,6 +97,17 @@ public class KeystoreSetup  {
 		}
 	}
 	public void setPkiContext() {
+		TrustManager[] tm=null;
+		KeyManager[] km = null;
+		if ((IncomingSystemProperty.getInstance().checkTrustStoreType())) {
+			if ((IncomingSystemProperty.getInstance().checkTrustStore())) {
+				tm = new TrustManager[] { ConfigureTrust.getInstance() };
+			} else {
+				ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
+				return;
+			}
+		}
+		
 		if ((IncomingSystemProperty.getInstance().checkTrustStoreType()) && (isKeyStoreLoaded())) {
 			if ((IncomingSystemProperty.getInstance().checkTrustStore())
 					&& (KeyStoreManager.getInstance().isKeyStoreInitialized())) {
@@ -104,59 +115,38 @@ public class KeystoreSetup  {
 				Optional<X509TrustManager> PKIXtrust = ConfigureTrust.getInstance().setUp();
 
 				try {
-					KeyManager[] km = new KeyManager[] { KeyStoreManager.getInstance() };
-					TrustManager[] tm = new TrustManager[] { ConfigureTrust.getInstance() };
+					km = new KeyManager[] { KeyStoreManager.getInstance() };
 					if (PKIXtrust.isEmpty()) {
 						ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
-					} else {
-						SSLContext ctx = SSLContext.getInstance("TLS");//$NON-NLS-1$
-						ctx.init(km, tm, null);
-						SSLContext.setDefault(ctx);
-						HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
-						setSSLContext(ctx);
-						pkiInstance = PKIProperties.getInstance();
-						pkiInstance.load();
-						setUserEmail();
-						
-						// Grab a handle to registry
-						//File[] storageDirs = null;
-						//boolean[] cacheReadOnly = null;
-						//String token = "core.pki";
-						/*
-						 * try { IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot(); //
-						 * IResource resource = //
-						 * ResourcesPlugin.getWorkspace().getAdapter(IResource.class); IMarker marker =
-						 * root.createMarker("virtual.core.pki.context"); marker.setAttribute(token,
-						 * ctx); } catch (Exception imarkerErr) { imarkerErr.printStackTrace(); }
-						 */
-						/*
-						 * IExtensionRegistry registry = Platform.getExtensionRegistry();
-						 * IConfigurationElement[] extensions =
-						 * registry.getConfigurationElementsFor(EXTENSION_POINT); for
-						 * (IConfigurationElement element : extensions) { [..] }
-						 */
-
-						// InjectorFactory.getDefault().addBinding(MyPart.class).implementedBy(MyFactory.class)
-						// RegistryStrategy strategy = RegistryFactory.createOSGiStrategy(File[]
-						// storageDirs, boolean[] cacheReadOnly, Object token)
-//						RegistryStrategy strategy = RegistryFactory.createOSGiStrategy(storageDirs,
-//								cacheReadOnly, token);
-//						// IExtensionRegistry registry = RegistryFactory.getRegistry();
-//						IExtensionRegistry registry = RegistryFactory.createRegistry(strategy, token, ctx);
-//
-//						setupAdapter();
-						ActivateSecurity.getInstance().log("default SSLContext has been configured."); //$NON-NLS-1$
-					}
-				} catch (NoSuchAlgorithmException e) {
+						return;
+					} 
+				} catch (Exception e) {
 					ActivateSecurity.getInstance().log("No such Algorithm Initialization Error."); //$NON-NLS-1$
-				} catch (KeyManagementException e) {
-					ActivateSecurity.getInstance().log("KeyManagement Initialization Error"); //$NON-NLS-1$
-				}
+				} 
 			} else {
 				ActivateSecurity.getInstance().log("Valid KeyStore and Truststore not found."); //$NON-NLS-1$
 			}
 		} else {
 			ActivateSecurity.getInstance().log("Valid Truststore not found."); //$NON-NLS-1$
+		}
+		activateSecureContext(km,tm);
+	}
+	public void activateSecureContext( KeyManager[] km, TrustManager[] tm ) {
+		try {
+			SSLContext ctx = SSLContext.getInstance("TLS");//$NON-NLS-1$
+			ctx.init(km, tm, null);
+			SSLContext.setDefault(ctx);
+			HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
+			setSSLContext(ctx);
+			pkiInstance = PKIProperties.getInstance();
+			pkiInstance.load();
+			ActivateSecurity.getInstance().setupAdapter();
+			setUserEmail();
+			ActivateSecurity.getInstance().log("default SSLContext adapter has been configured."); //$NON-NLS-1$
+		} catch (KeyManagementException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
 		}
 	}
 	public SSLContext getSSLContext() {

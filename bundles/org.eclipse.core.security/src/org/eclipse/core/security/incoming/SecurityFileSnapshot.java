@@ -42,15 +42,6 @@ import org.eclipse.core.security.encryption.SecurityOpRequest;
 import org.eclipse.core.security.identification.PkiPasswordGrabberWidget;
 import org.eclipse.core.security.identification.PublishPasswordUpdate;
 
-//import org.eclipse.core.pki.util.DotPkiPropertiesRequired;
-//import org.eclipse.core.pki.util.LogUtil;
-//import org.eclipse.core.pki.util.NormalizeGCM;
-//import org.eclipse.core.pki.util.SecureGCM;
-//import org.eclipse.core.pki.util.TemplateForPKIfile;
-//import org.eclipse.core.security.ActivateSecurity;
-//import org.eclipse.core.pki.pkiselection.PkiPasswordGrabberWidget;
-//import org.eclipse.core.pki.pkiselection.SecurityOpRequest;
-
 public class SecurityFileSnapshot {
 	
 	private static SecurityFileSnapshot INSTANCE;
@@ -125,7 +116,6 @@ public class SecurityFileSnapshot {
 				try {
 					Files.createFile(userDotEclipseHome);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				isSecurityFileRequired(pkiFileFQN);
@@ -176,18 +166,15 @@ public class SecurityFileSnapshot {
 										System.getProperty("core.key"));
 								if (!(testKeyContainer.isEmpty() ))  {
 									String testKey = testKeyContainer.get().toString().trim();
-									System.out.println("SecurityFileSnapshot TESTING:"+testKey);
 									if (testKey.equalsIgnoreCase("eclipse.core.pki.testing")) {
 										return properties;
 									}
 								}
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 							String pw=PkiPasswordGrabberWidget.getInstance().getInput();
 							ActivateSecurity.getInstance().log("PASSWORD HAS BEEN INPUT.");// $NON-NLS-1$
-						
 							System.setProperty("javax.net.ssl.keyStorePassword", pw);//$NON-NLS-1$
 						} catch(Exception xe) {
 							// User may have said cancel
@@ -228,11 +215,9 @@ public class SecurityFileSnapshot {
 			lock.release();
 			ActivateSecurity.getInstance().log("Loaded PKI System Properties");// $NON-NLS-1$
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return properties;
-
 	}
 
 	public void restoreProperties() {
@@ -246,7 +231,6 @@ public class SecurityFileSnapshot {
 			os.flush();
 			os.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -307,8 +291,7 @@ public class SecurityFileSnapshot {
 				a.add("javax.net.ssl.keyStoreType=" + System.getProperty("javax.net.ssl.keyStoreType"));//$NON-NLS-1$ //$NON-NLS-2$
 				a.add("javax.net.ssl.keyStore=" + System.getProperty("javax.net.ssl.keyStore")); //$NON-NLS-1$ //$NON-NLS-2$
 				if (System.getProperty("javax.net.ssl.keyStoreType").equalsIgnoreCase("PKCS12")) { //$NON-NLS-1$ //$NON-NLS-2$
-					// a.add("javax.net.ssl.keyStorePassword="+
-					// System.getProperty("javax.net.ssl.keyStorePassword"));
+					
 				} else {
 					a.add("javax.net.ssl.keyStorePassword=");//$NON-NLS-1$
 					a.add("javax.net.ssl.keyStoreProvider=" + System.getProperty("javax.net.ssl.keyStoreProvider")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -316,7 +299,6 @@ public class SecurityFileSnapshot {
 			}
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return a;
