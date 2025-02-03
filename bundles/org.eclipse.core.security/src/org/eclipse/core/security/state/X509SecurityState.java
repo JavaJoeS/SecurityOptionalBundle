@@ -36,5 +36,4 @@ public class X509SecurityState {
 	public void setPKCS12on(boolean isPKCS12on) {
 		this.isPKCS12on = isPKCS12on;
 	}
-
 }

@@ -34,19 +34,14 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.eclipse.core.pki.AuthenticationBase;
-import org.eclipse.core.pki.pkiselection.PKIProperties;
-import org.eclipse.core.pki.util.ConfigureTrust;
-import org.eclipse.core.pki.util.KeyStoreFormat;
-import org.eclipse.core.pki.util.KeyStoreManager;
-import org.eclipse.core.pki.util.LogUtil;
-
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
+import org.eclipse.core.security.incoming.InBoundController;
+import org.eclipse.core.security.state.X509SecurityState;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
@@ -61,20 +56,19 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 public class ActivateSecurity implements BundleActivator, IStartup {
-	public static final String ID = "org.eclipse.core.pki"; //$NON-NLS-1$
+	public static final String ID = "org.eclipse.core.security"; //$NON-NLS-1$
 	protected final String pin = "#Gone2Boat@Bay"; //$NON-NLS-1$
 	private static ActivateSecurity instance;
 	
 	
 	static boolean isPkcs11Installed = false;
-	static boolean isKeyStoreLoaded = false;
+	public static boolean isKeyStoreLoaded = false;
 	private BundleContext context;
 	SSLContext sslContext = null;
 	
-	private static final ServiceCaller<ILog> logger = new ServiceCaller(PKISetup.class, ILog.class);
+	private static final ServiceCaller<ILog> logger = new ServiceCaller(ActivateSecurity.class, ILog.class);
 	protected static KeyStore keyStore = null;
-	PKIProperties pkiInstance = null;
-	Properties pkiProperties = null;
+	
 	Optional<KeyStore> keystoreContainer = null;
 	private static final int DIGITAL_SIGNATURE = 0;
 	private static final int KEY_CERT_SIGN = 5;
@@ -105,8 +99,8 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 		return instance;
 	}
 
-	public static void setInstance(PKISetup instance) {
-		PKISetup.instance = instance;
+	public static void setInstance(ActivateSecurity instance) {
+		ActivateSecurity.instance = instance;
 	}
 
 	public void log(String message) {
@@ -114,65 +108,15 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 	}
 
 	public void Startup() {
-
-		// log("Startup method is now running"); //$NON-NLS-1$
-
+		/*
+		 * Initialize preliminary PKCS settings
+		 */
 		Optional<String> type = null;
 		Optional<String> decryptedPw;
-
-		X509SecurityState.CONTROL.setPKCS11on(false);
-		X509SecurityState.CONTROL.setPKCS12on(false);
-		/*
-		 * First see if parameters were passed into eclipse via the command line -D
-		 */
-		type = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
-
-		if (type.isEmpty()) {
-			//
-			// Incoming parameter as -DkeystoreType was empty so CHECK in .pki file
-			//
-			PKIState.CONTROL.setPKCS11on(false);
-			PKIState.CONTROL.setPKCS12on(false);
-			if (PublicKeySecurity.INSTANCE.isTurnedOn()) {
-				PublicKeySecurity.INSTANCE.getPkiPropertyFile(pin);
-			}
-		}
-		// LogUtil.logInfo("PKISetup - now looking at incoming"); //$NON-NLS-1$
-		if (IncomingSystemProperty.SETTINGS.checkType()) {
-			if (IncomingSystemProperty.SETTINGS.checkKeyStore(pin)) {
-				KeystoreSetup setup = KeystoreSetup.getInstance();
-				if (PKIState.CONTROL.isPKCS12on()) {
-					
-					setup.installKeystore();
-					
-				}
-				if (PKIState.CONTROL.isPKCS11on()) {
-					String pkcs11Pin = "";
-					LogUtil.logInfo("PKISetup - Processing PKCS11"); //$NON-NLS-1$
-					decryptedPw = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword"));
-					if (!decryptedPw.isEmpty()) {
-						pkcs11Pin = decryptedPw.get();
-					}
-					keystoreContainer = Optional
-							.ofNullable(AuthenticationBase.INSTANCE.initialize(pkcs11Pin.toCharArray()));// $NON-NLS-1$
-					if (keystoreContainer.isEmpty()) {
-						LogUtil.logError("PKISetup - Failed to Load a Keystore.", null); //$NON-NLS-1$
-						PKIState.CONTROL.setPKCS11on(false);
-						System.clearProperty("javax.net.ssl.keyStoreType"); //$NON-NLS-1$
-						System.clearProperty("javax.net.ssl.keyStore"); //$NON-NLS-1$
-						System.clearProperty("javax.net.ssl.keyStoreProvider"); //$NON-NLS-1$
-						System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
-						SecurityFileSnapshot.INSTANCE.restoreProperties();
-					} else {
-						LogUtil.logError("A Keystore and Password are detected.", null); //$NON-NLS-1$
-						keyStore = keystoreContainer.get();
-						KeyStoreManager.INSTANCE.setKeyStore(keyStore);
-						setKeyStoreLoaded(true);
-						setup.setPkiContext();
-					}
-				}
-			}
-		}
+		X509SecurityState.getInstance().setPKCS11on(false);
+		X509SecurityState.getInstance().setPKCS12on(false);
+		InBoundController.getInstance().controller();
+		
 	}
 
 	public SSLContext getSSLContext() {
@@ -183,12 +127,12 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 		this.sslContext = context;
 	}
 
-	private boolean isKeyStoreLoaded() {
+	public boolean isKeyStoreLoaded() {
 		return isKeyStoreLoaded;
 	}
 
-	private void setKeyStoreLoaded(boolean isKeyStoreLoaded) {
-		PKISetup.isKeyStoreLoaded = isKeyStoreLoaded;
+	public void setKeyStoreLoaded(boolean isKeyStoreLoaded) {
+		ActivateSecurity.isKeyStoreLoaded = isKeyStoreLoaded;
 	}
 
 	private static boolean isDigitalSignature(boolean[] ba) {

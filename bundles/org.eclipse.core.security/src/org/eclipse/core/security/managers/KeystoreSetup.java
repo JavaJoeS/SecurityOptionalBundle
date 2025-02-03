@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eclipse Platform, Security Group and others.
+ * Copyright (c) 2025 Eclipse Platform, Security Group and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,14 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
+import org.eclipse.core.security.ActivateSecurity;
+import org.eclipse.core.security.IncomingSystemProperty;
+import org.eclipse.core.security.incoming.SecurityFileSnapshot;
+import org.eclipse.core.security.state.X509SecurityState;
+import org.eclipse.core.security.util.KeyStoreFormat;
+import org.eclipse.core.security.util.PKIProperties;
+import org.eclipse.core.security.managers.KeyStoreManager;
+import org.eclipse.core.security.managers.ConfigureTrust;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.IResource;
@@ -41,14 +49,6 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.pki.util.LogUtil;
-import org.eclipse.core.pki.util.ConfigureTrust;
-import org.eclipse.core.pki.util.KeyStoreManager;
-import org.eclipse.core.pki.util.KeyStoreFormat;
-
-
-import org.eclipse.core.pki.pkiselection.PKIProperties;
-
 
 public class KeystoreSetup  {
 	static boolean isPkcs11Installed = false;
@@ -61,12 +61,11 @@ public class KeystoreSetup  {
 	private static final int KEY_CERT_SIGN = 5;
 	private static final int CRL_SIGN = 6;
 	private static KeystoreSetup INSTANCE;
-	public KeystoreSetup() {}
+	private KeystoreSetup() {}
 	public static KeystoreSetup getInstance() {
         if(INSTANCE == null) {
             INSTANCE = new KeystoreSetup();
         }
-        
         return INSTANCE;
     }
 	public void installKeystore() {
@@ -75,40 +74,40 @@ public class KeystoreSetup  {
 		try {
 
 			keystoreContainer = Optional.ofNullable(
-					KeyStoreManager.INSTANCE.getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
+					KeyStoreManager.getInstance().getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
 							System.getProperty("javax.net.ssl.keyStorePassword"), //$NON-NLS-1$
 							KeyStoreFormat.valueOf(System.getProperty("javax.net.ssl.keyStoreType")))); //$NON-NLS-1$
 
-			if ((keystoreContainer.isEmpty()) || (!(KeyStoreManager.INSTANCE.isKeyStoreInitialized()))) {
-				LogUtil.logError("PKISetup - Failed to Load a Keystore.", null); //$NON-NLS-1$
-				PKIState.CONTROL.setPKCS12on(false);
+			if ((keystoreContainer.isEmpty()) || (!(KeyStoreManager.getInstance().isKeyStoreInitialized()))) {
+				ActivateSecurity.getInstance().log("Failed to Load a Keystore."); //$NON-NLS-1$
+				X509SecurityState.getInstance().setPKCS12on(false);
 				System.clearProperty("javax.net.ssl.keyStoreType"); //$NON-NLS-1$
 				System.clearProperty("javax.net.ssl.keyStore"); //$NON-NLS-1$
 				System.clearProperty("javax.net.ssl.keyStoreProvider"); //$NON-NLS-1$
 				System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
-				SecurityFileSnapshot.INSTANCE.restoreProperties();
+				SecurityFileSnapshot.getInstance().restoreProperties();
 			} else {
-				LogUtil.logError("A Keystore and Password are detected.", null); //$NON-NLS-1$
+				ActivateSecurity.getInstance().log("A Keystore and Password are detected."); //$NON-NLS-1$
 				keyStore = keystoreContainer.get();
 				setKeyStoreLoaded(true);
 				setPkiContext();
 			}
 		} catch (Exception e) {
-			LogUtil.logError("Failed to Load Keystore.", e); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("Failed to Load a Keystore."); //$NON-NLS-1$
 		}
 	}
 	public void setPkiContext() {
-		if ((IncomingSystemProperty.SETTINGS.checkTrustStoreType()) && (isKeyStoreLoaded())) {
-			if ((IncomingSystemProperty.SETTINGS.checkTrustStore())
-					&& (KeyStoreManager.INSTANCE.isKeyStoreInitialized())) {
-				LogUtil.logInfo("A KeyStore and Truststore are detected."); //$NON-NLS-1$
-				Optional<X509TrustManager> PKIXtrust = ConfigureTrust.MANAGER.setUp();
+		if ((IncomingSystemProperty.getInstance().checkTrustStoreType()) && (isKeyStoreLoaded())) {
+			if ((IncomingSystemProperty.getInstance().checkTrustStore())
+					&& (KeyStoreManager.getInstance().isKeyStoreInitialized())) {
+				ActivateSecurity.getInstance().log("A KeyStore and Truststore are detected."); //$NON-NLS-1$
+				Optional<X509TrustManager> PKIXtrust = ConfigureTrust.getInstance().setUp();
 
 				try {
-					KeyManager[] km = new KeyManager[] { KeyStoreManager.INSTANCE };
-					TrustManager[] tm = new TrustManager[] { ConfigureTrust.MANAGER };
+					KeyManager[] km = new KeyManager[] { KeyStoreManager.getInstance() };
+					TrustManager[] tm = new TrustManager[] { ConfigureTrust.getInstance() };
 					if (PKIXtrust.isEmpty()) {
-						LogUtil.logError("Invalid TrustManager Initialization.", null); //$NON-NLS-1$
+						ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
 					} else {
 						SSLContext ctx = SSLContext.getInstance("TLS");//$NON-NLS-1$
 						ctx.init(km, tm, null);
@@ -118,6 +117,7 @@ public class KeystoreSetup  {
 						pkiInstance = PKIProperties.getInstance();
 						pkiInstance.load();
 						setUserEmail();
+						
 						// Grab a handle to registry
 						//File[] storageDirs = null;
 						//boolean[] cacheReadOnly = null;
@@ -145,20 +145,18 @@ public class KeystoreSetup  {
 //						IExtensionRegistry registry = RegistryFactory.createRegistry(strategy, token, ctx);
 //
 //						setupAdapter();
-						LogUtil.logInfo("PKISetup default SSLContext has been configured."); //$NON-NLS-1$
+						ActivateSecurity.getInstance().log("default SSLContext has been configured."); //$NON-NLS-1$
 					}
 				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
-					LogUtil.logError("Initialization Error", e); //$NON-NLS-1$
+					ActivateSecurity.getInstance().log("No such Algorithm Initialization Error."); //$NON-NLS-1$
 				} catch (KeyManagementException e) {
-					// TODO Auto-generated catch block
-					LogUtil.logError("Initialization Error", e); //$NON-NLS-1$
+					ActivateSecurity.getInstance().log("KeyManagement Initialization Error"); //$NON-NLS-1$
 				}
 			} else {
-				LogUtil.logError("Valid KeyStore and Truststore not found.", null); //$NON-NLS-1$
+				ActivateSecurity.getInstance().log("Valid KeyStore and Truststore not found."); //$NON-NLS-1$
 			}
 		} else {
-			LogUtil.logError("Valid Truststore not found.", null); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("Valid Truststore not found."); //$NON-NLS-1$
 		}
 	}
 	public SSLContext getSSLContext() {
@@ -169,11 +167,11 @@ public class KeystoreSetup  {
 		this.sslContext = context;
 	}
 	public boolean isKeyStoreLoaded() {
-		return PKISetup.isKeyStoreLoaded;
+		return ActivateSecurity.getInstance().isKeyStoreLoaded();
 	}
 
 	private void setKeyStoreLoaded(boolean isKeyStoreLoaded) {
-		PKISetup.isKeyStoreLoaded = isKeyStoreLoaded;
+		ActivateSecurity.getInstance().setKeyStoreLoaded(isKeyStoreLoaded);
 	}
 	private void setUserEmail() {
 		try {

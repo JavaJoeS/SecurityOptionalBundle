@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eclipse Platform, Security Group and others.
+ * Copyright (c) 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,30 +9,33 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Eclipse Platform - initial API and implementation
+ * IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.security;
+package org.eclipse.core.security.incoming;
 
 import java.util.Optional;
 
-import org.eclipse.core.security.encryption.NormalizeGCM;
+import org.eclipse.core.pki.util.LogUtil;
+import org.eclipse.core.pki.util.NormalizeGCM;
+import org.eclipse.core.security.ActivateSecurity;
 import org.eclipse.core.security.state.X509SecurityState;
 
 public class IncomingSystemProperty {
 	private static IncomingSystemProperty INSTANCE;
 	private IncomingSystemProperty() {}
 	public static IncomingSystemProperty getInstance() {
-        if(INSTANCE == null) {
-            INSTANCE = new IncomingSystemProperty();
-        }
-        return INSTANCE;
-    }
+		if (INSTANCE == null) {
+			INSTANCE = new IncomingSystemProperty();
+		}
+		return INSTANCE;
+	}
+
 	public boolean checkType() {
 		Optional<String> type = null;
 
 		type = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
 		if (type.isEmpty()) {
-			ActivateSecurity.getInstance().log("No incoming System Properties are set for PKI."); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("No incoming System Properties are set for PKI.");//$NON-NLS-1$
 			return false;
 		}
 		if (type.get().equalsIgnoreCase("PKCS11")) { //$NON-NLS-1$
@@ -40,7 +43,6 @@ public class IncomingSystemProperty {
 			return true;
 		}
 		if (type.get().equalsIgnoreCase("PKCS12")) { //$NON-NLS-1$
-			
 			X509SecurityState.getInstance().setPKCS12on(true);
 			return true;
 		}
@@ -62,7 +64,7 @@ public class IncomingSystemProperty {
 		}
 		keyStorePassword = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword")); //$NON-NLS-1$
 		if (keyStorePassword.isEmpty()) {
-			ActivateSecurity.getInstance().log("A Keystore Password is required, javax.net.ssl.keyStorePassword."); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("A Keystore Password is required, javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
 			return false;
 		} else {
 			PasswordDecrypted = Optional.ofNullable(System.getProperty("javax.net.ssl.decryptedPassword")); //$NON-NLS-1$
@@ -72,7 +74,7 @@ public class IncomingSystemProperty {
 			} else {
 				if (PasswordEncrypted.get().toString().equalsIgnoreCase("true")) { //$NON-NLS-1$
 					salt = new String(System.getProperty("user.name") + pin).getBytes(); //$NON-NLS-1$
-					String passwd = NormalizeGCM.getInstance().decrypt(keyStorePassword.get().toString(), pin,
+					String passwd = NormalizeGCM.DECRYPT.decrypt(keyStorePassword.get().toString(), pin,
 							new String(salt));
 					System.setProperty("javax.net.ssl.keyStorePassword", passwd); //$NON-NLS-1$
 				}
