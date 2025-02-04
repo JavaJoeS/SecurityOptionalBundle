@@ -66,6 +66,7 @@ public class DotPkiPropertiesRequired {
 			    	}
 			    	if (!(list.isEmpty())) {
 			    		ActivateSecurity.getInstance().log("Missing properies;"+ list.toString());// $NON-NLS-1$
+			    		return true;
 			    	} else {
 			    		return true;
 			    	}

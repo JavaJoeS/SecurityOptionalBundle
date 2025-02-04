@@ -57,10 +57,13 @@ public class InBoundController {
 		if (IncomingSystemProperty.getInstance().checkType()) {
 			if (IncomingSystemProperty.getInstance().checkKeyStore(pin)) {
 				KeystoreSetup setup = KeystoreSetup.getInstance();
-				if (X509SecurityState.getInstance().isPKCS12on()) {
-
+				if (X509SecurityState.getInstance().isTrustOn()) {
 					setup.installKeystore();
-
+					setup.setPkiContext();
+				}
+				if (X509SecurityState.getInstance().isPKCS12on()) {
+					setup.installKeystore();
+					setup.setPkiContext();
 				}
 				if (X509SecurityState.getInstance().isPKCS11on()) {
 					String pkcs11Pin = "";//$NON-NLS-1$

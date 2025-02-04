@@ -85,50 +85,48 @@ public class KeystoreSetup  {
 				System.clearProperty("javax.net.ssl.keyStore"); //$NON-NLS-1$
 				System.clearProperty("javax.net.ssl.keyStoreProvider"); //$NON-NLS-1$
 				System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
-				SecurityFileSnapshot.getInstance().restoreProperties();
+				//SecurityFileSnapshot.getInstance().restoreProperties();
 			} else {
 				ActivateSecurity.getInstance().log("A Keystore and Password are detected."); //$NON-NLS-1$
 				keyStore = keystoreContainer.get();
 				setKeyStoreLoaded(true);
-				setPkiContext();
 			}
 		} catch (Exception e) {
-			ActivateSecurity.getInstance().log("Failed to Load a Keystore."); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("Exception Loading a Keystore:"+e.getMessage()); //$NON-NLS-1$
 		}
 	}
 	public void setPkiContext() {
 		TrustManager[] tm=null;
 		KeyManager[] km = null;
-		if ((IncomingSystemProperty.getInstance().checkTrustStoreType())) {
+		if (IncomingSystemProperty.getInstance().checkTrustStoreType()) {
+			ActivateSecurity.getInstance().log("Activating TrustManager Initialization."); //$NON-NLS-1$
 			if ((IncomingSystemProperty.getInstance().checkTrustStore())) {
+				X509SecurityState.getInstance().setTrustOn(true);
+				Optional<X509TrustManager> PKIXtrust = ConfigureTrust.getInstance().setUp();
+				if (PKIXtrust.isEmpty()) {
+					ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
+					return;
+				} 
 				tm = new TrustManager[] { ConfigureTrust.getInstance() };
+				ActivateSecurity.getInstance().log("TrustManager Initialization Done."); //$NON-NLS-1$
 			} else {
 				ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
 				return;
 			}
 		}
 		
-		if ((IncomingSystemProperty.getInstance().checkTrustStoreType()) && (isKeyStoreLoaded())) {
-			if ((IncomingSystemProperty.getInstance().checkTrustStore())
-					&& (KeyStoreManager.getInstance().isKeyStoreInitialized())) {
-				ActivateSecurity.getInstance().log("A KeyStore and Truststore are detected."); //$NON-NLS-1$
-				Optional<X509TrustManager> PKIXtrust = ConfigureTrust.getInstance().setUp();
-
+		if (isKeyStoreLoaded()) {
+			if (KeyStoreManager.getInstance().isKeyStoreInitialized()) {
+				ActivateSecurity.getInstance().log("A KeyStore detected."); //$NON-NLS-1$
 				try {
 					km = new KeyManager[] { KeyStoreManager.getInstance() };
-					if (PKIXtrust.isEmpty()) {
-						ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
-						return;
-					} 
 				} catch (Exception e) {
 					ActivateSecurity.getInstance().log("No such Algorithm Initialization Error."); //$NON-NLS-1$
 				} 
 			} else {
-				ActivateSecurity.getInstance().log("Valid KeyStore and Truststore not found."); //$NON-NLS-1$
+				ActivateSecurity.getInstance().log("Valid KeyStore not found."); //$NON-NLS-1$
 			}
-		} else {
-			ActivateSecurity.getInstance().log("Valid Truststore not found."); //$NON-NLS-1$
-		}
+		} 
 		activateSecureContext(km,tm);
 	}
 	public void activateSecureContext( KeyManager[] km, TrustManager[] tm ) {

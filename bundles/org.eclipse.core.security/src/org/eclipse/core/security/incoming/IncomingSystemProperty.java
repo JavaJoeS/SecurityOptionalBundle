@@ -33,8 +33,9 @@ public class IncomingSystemProperty {
 
 		type = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
 		if (type.isEmpty()) {
-			ActivateSecurity.getInstance().log("No incoming System Properties are set for PKI.");//$NON-NLS-1$
-			return false;
+			ActivateSecurity.getInstance().log("Continue without javax.net.ssl.keyStoreType.");//$NON-NLS-1$
+			X509SecurityState.getInstance().setTrustOn(true);
+			return true;
 		}
 		if (type.get().equalsIgnoreCase("PKCS11")) { //$NON-NLS-1$
 			X509SecurityState.getInstance().setPKCS11on(true);
@@ -57,13 +58,13 @@ public class IncomingSystemProperty {
 		if (keyStore.isEmpty()) {
 			X509SecurityState.getInstance().setPKCS11on(false);
 			X509SecurityState.getInstance().setPKCS12on(false);
-			ActivateSecurity.getInstance().log("No Keystore is set, javax.net.ssl.keyStore."); //$NON-NLS-1$
-			return false;
+			//ActivateSecurity.getInstance().log("No Keystore is set, javax.net.ssl.keyStore."); //$NON-NLS-1$
+			//return false;
 		}
 		keyStorePassword = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword")); //$NON-NLS-1$
 		if (keyStorePassword.isEmpty()) {
-			ActivateSecurity.getInstance().log("A Keystore Password is required, javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
-			return false;
+			//ActivateSecurity.getInstance().log("A Keystore Password is required, javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
+			//return false;
 		} else {
 			PasswordDecrypted = Optional.ofNullable(System.getProperty("javax.net.ssl.decryptedPassword")); //$NON-NLS-1$
 			PasswordEncrypted = Optional.ofNullable(System.getProperty("javax.net.ssl.encryptedPassword")); //$NON-NLS-1$
@@ -86,7 +87,7 @@ public class IncomingSystemProperty {
 
 		type = Optional.ofNullable(System.getProperty("javax.net.ssl.trustStoreType")); //$NON-NLS-1$
 		if (type.isEmpty()) {
-			ActivateSecurity.getInstance().log("No incoming System Properties are set for PKI."); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("No incoming javax.net.ssl.trustStoreType."); //$NON-NLS-1$
 			return false;
 		}
 		return true;

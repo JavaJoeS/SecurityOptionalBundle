@@ -15,6 +15,9 @@ package org.eclipse.core.security.state;
 
 public class X509SecurityState {
 	private static X509SecurityState INSTANCE;
+	private boolean isPKCS11on=false;
+	private boolean isPKCS12on=false;
+	private boolean isTrustOn=false;
 	private X509SecurityState() {}
 	public static X509SecurityState getInstance() {
         if(INSTANCE == null) {
@@ -22,8 +25,7 @@ public class X509SecurityState {
         }
         return INSTANCE;
     }
-	private boolean isPKCS11on=false;
-	private boolean isPKCS12on=false;
+	
 	public boolean isPKCS11on() {
 		return isPKCS11on;
 	}
@@ -35,5 +37,11 @@ public class X509SecurityState {
 	}
 	public void setPKCS12on(boolean isPKCS12on) {
 		this.isPKCS12on = isPKCS12on;
+	}
+	public boolean isTrustOn() {
+		return isTrustOn;
+	}
+	public void setTrustOn(boolean isTrustOn) {
+		this.isTrustOn = isTrustOn;
 	}
 }
