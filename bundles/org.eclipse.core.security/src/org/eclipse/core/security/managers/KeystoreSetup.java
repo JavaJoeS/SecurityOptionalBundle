@@ -35,7 +35,7 @@ import java.security.cert.X509Certificate;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.core.security.ActivateSecurity;
-import org.eclipse.core.security.IncomingSystemProperty;
+import org.eclipse.core.security.incoming.IncomingSystemProperty;
 import org.eclipse.core.security.incoming.SecurityFileSnapshot;
 import org.eclipse.core.security.state.X509SecurityState;
 import org.eclipse.core.security.util.KeyStoreFormat;
