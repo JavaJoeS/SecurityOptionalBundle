@@ -42,6 +42,8 @@ import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.core.security.incoming.InBoundController;
 import org.eclipse.core.security.state.X509SecurityState;
+import org.eclipse.core.security.identification.PublishPasswordUpdateIfc;
+import org.eclipse.core.security.identification.PublishPasswordUpdate;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
@@ -54,8 +56,11 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class ActivateSecurity implements BundleActivator, IStartup {
+public class ActivateSecurity implements BundleActivator, IStartup, ServiceTrackerCustomizer<PublishPasswordUpdateIfc,PublishPasswordUpdateIfc> {
 	public static final String ID = "org.eclipse.core.security"; //$NON-NLS-1$
 	private static ActivateSecurity instance;
 	static boolean isPkcs11Installed = false;
@@ -63,6 +68,7 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 	private BundleContext context;
 	protected SSLContext sslContext;
 	
+	private ServiceTracker<PublishPasswordUpdateIfc,PublishPasswordUpdateIfc> subscriberServiceTracker;
 	private static final ServiceCaller<ILog> logger = new ServiceCaller(ActivateSecurity.class, ILog.class);
 	protected static KeyStore keyStore = null;
 	
@@ -90,6 +96,10 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		context=null;
+		if (subscriberServiceTracker != null) {
+			subscriberServiceTracker.close();
+			subscriberServiceTracker = null;
+		}
 	}
 
 	public static ActivateSecurity getInstance() {
@@ -110,7 +120,17 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 		 */
 		X509SecurityState.getInstance().setPKCS11on(false);
 		X509SecurityState.getInstance().setPKCS12on(false);
-		InBoundController.getInstance().controller();
+		try {
+			InBoundController.getInstance().controller();
+		} catch(Exception e) {
+			ActivateSecurity.getInstance().log("ActivateSecurity could not Run.");
+		}
+		// Create and open ITimeService tracker
+		this.subscriberServiceTracker = 
+				new ServiceTracker<PublishPasswordUpdateIfc,PublishPasswordUpdateIfc>(
+						ActivateSecurity.getInstance().context,
+						PublishPasswordUpdateIfc.class,this);
+		this.subscriberServiceTracker.open();
 	}
 
 	public SSLContext getSSLContext() {
@@ -135,6 +155,31 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 		} else {
 			return false;
 		}
+	}
+	/**
+	 * NOTE:  The method will be called when the Service is discovered.
+	 */
+	public PublishPasswordUpdateIfc addingService(
+			ServiceReference<PublishPasswordUpdateIfc> reference) {
+		// XXX Here is where the ITimeService is received, when discovered.
+		System.out.println("ITimeServicePublishPasswordUpdateIfc discovered!");
+		System.out.println("Service Reference="+reference);
+		// Get the time service proxy
+		PublishPasswordUpdateIfc subscriberService = this.context.getService(reference);
+		System.out.println("Calling Service="+subscriberService);
+		// Call the service!
+		//Long time = timeService.getCurrentTime();
+		// Print out the result
+		//System.out.println("Call Done.  Current time given by ITimeService.getCurrentTime() is: "+time);
+		return subscriberService;
+	}
+	public void modifiedService(ServiceReference<PublishPasswordUpdateIfc> reference,
+			PublishPasswordUpdateIfc service) {
+		// do nothing
+	}
+	public void removedService(ServiceReference<PublishPasswordUpdateIfc> reference,
+			PublishPasswordUpdateIfc service) {
+		System.out.println("SubscriberService undiscovered!");
 	}
 
 	public void setupAdapter() {
@@ -163,5 +208,14 @@ public class ActivateSecurity implements BundleActivator, IStartup {
 			}
 		};
 		Platform.getAdapterManager().registerAdapters(pr,IResource.class);
+	}
+	public void activateSubscriber() {
+//		Properties props = new Properties();
+//		// add OSGi service property indicated export of all interfaces exposed by service (wildcard)
+//		props.put(IDistributionConstants.SERVICE_EXPORTED_INTERFACES,IDistributionConstants.SERVICE_EXPORTED_INTERFACES_WILDCARD);
+//		// add OSGi service property specifying config
+//		props.put(IDistributionConstants.SERVICE_EXPORTED_CONFIGS, containerType);
+//		// register remote service
+//		helloRegistration = bundleContext.registerService(IHello.class.getName(), new Hello(), props);
 	}
 }

@@ -45,6 +45,14 @@ public class InBoundController {
 		 */
 		keystoreTypeContainer = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
 
+		Optional<String> testKeyContainer = Optional.ofNullable(
+				System.getProperty("core.key"));
+		if (!(testKeyContainer.isEmpty() ))  {
+			String testKey = testKeyContainer.get().toString().trim();
+			if (testKey.equalsIgnoreCase("eclipse.core.pki.testing")) {
+				return;
+			}
+		}
 		if (keystoreTypeContainer.isEmpty()) {
 			//
 			// Incoming parameter as -DkeystoreType was empty so CHECK in .pki file
@@ -52,45 +60,6 @@ public class InBoundController {
 			
 			if (PublicKeySecurity.getInstance().isTurnedOn()) {
 				PublicKeySecurity.getInstance().getPkiPropertyFile(pin);
-			}
-		}
-		if (IncomingSystemProperty.getInstance().checkType()) {
-			if (IncomingSystemProperty.getInstance().checkKeyStore(pin)) {
-				KeystoreSetup setup = KeystoreSetup.getInstance();
-				if (X509SecurityState.getInstance().isTrustOn()) {
-					setup.installKeystore();
-					setup.setPkiContext();
-				}
-				if (X509SecurityState.getInstance().isPKCS12on()) {
-					setup.installKeystore();
-					setup.setPkiContext();
-				}
-				if (X509SecurityState.getInstance().isPKCS11on()) {
-					String pkcs11Pin = "";//$NON-NLS-1$
-					ActivateSecurity.getInstance().log("Processing PKCS11 setup.");//$NON-NLS-1$
-					
-					decryptedPw = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword"));
-					if (!decryptedPw.isEmpty()) {
-						pkcs11Pin = decryptedPw.get();
-					}
-					keystoreContainer = Optional
-							.ofNullable(AuthenticationBase.getInstance().initialize(pkcs11Pin.toCharArray()));// $NON-NLS-1$
-					if (keystoreContainer.isEmpty()) {
-						ActivateSecurity.getInstance().log("Failed to Load a Keystore."); //$NON-NLS-1$
-						X509SecurityState.getInstance().setPKCS11on(false);
-						System.clearProperty("javax.net.ssl.keyStoreType"); //$NON-NLS-1$
-						System.clearProperty("javax.net.ssl.keyStore"); //$NON-NLS-1$
-						System.clearProperty("javax.net.ssl.keyStoreProvider"); //$NON-NLS-1$
-						System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
-						SecurityFileSnapshot.getInstance().restoreProperties();
-					} else {
-						ActivateSecurity.getInstance().log("A Keystore and Password are detected."); //$NON-NLS-1$
-						keyStore = keystoreContainer.get();
-						KeyStoreManager.getInstance().setKeyStore(keyStore);
-						ActivateSecurity.getInstance().setKeyStoreLoaded(true);
-						setup.setPkiContext();
-					}
-				}
 			}
 		}
 	}

@@ -132,6 +132,7 @@ public class SecurityFileSnapshot {
 		Properties properties = new Properties();
 		String passwd = null;
 		try {
+			IncomingSubscriber subscriber = IncomingSubscriber.getInstance();
 			FileChannel fileChannel = FileChannel.open(userDotEclipseHome, StandardOpenOption.READ);
 			FileChannel updateChannel = FileChannel.open(userDotEclipseHome, StandardOpenOption.WRITE);
 			FileLock lock = fileChannel.lock(0L, Long.MAX_VALUE, true);
@@ -173,9 +174,11 @@ public class SecurityFileSnapshot {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-							String pw=PkiPasswordGrabberWidget.getInstance().getInput();
-							ActivateSecurity.getInstance().log("PASSWORD HAS BEEN INPUT.");// $NON-NLS-1$
-							System.setProperty("javax.net.ssl.keyStorePassword", pw);//$NON-NLS-1$
+							PublishPasswordUpdate.getInstance().subscribe(subscriber);
+							PkiPasswordGrabberWidget runner = PkiPasswordGrabberWidget.getInstance();
+							Thread t1 = new Thread(runner);
+							t1.start();
+							
 						} catch(Exception xe) {
 							// User may have said cancel
 						}
@@ -206,6 +209,7 @@ public class SecurityFileSnapshot {
 					properties.setProperty("javax.net.ssl.decryptedPassword", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				}
+				subscriber.publishedIncoming();
 			}
 			
 			properties.setProperty("javax.net.ssl.decryptedPassword", "true"); //$NON-NLS-1$ //$NON-NLS-2$

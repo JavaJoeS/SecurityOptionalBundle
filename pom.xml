@@ -2,22 +2,19 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.eclipse</groupId>
+		<artifactId>security-parent</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
+
 	<groupId>org.eclipse</groupId>
 	<artifactId>securityoption</artifactId>
-	<version>0.0.1${revision}</version>
+	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
-		<tycho.version>4.0.8</tycho.version>
 		<top.dir>${maven.multiModuleProjectDirectory}</top.dir>
-		<!--<p2.repository>${top.dir}/updatesite/target/repository</p2.repository>-->
-		<tycho.buildqualifier.format>yyyyMMddHHmm</tycho.buildqualifier.format>
-		<maven.compiler.release>17</maven.compiler.release>
-		<eclipse-version>2024-09</eclipse-version>
-		<eclipse.repo>https://download.eclipse.org/releases/${eclipse-version}</eclipse.repo>
-		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-
-		<revision>${revisionSnapshot}</revision>
-
+		
 	</properties>
 
 
@@ -63,12 +60,18 @@
 					<artifactId>maven-install-plugin</artifactId>
 					<version>3.1.3</version>
 					<configuration>
-						<skip>true</skip>
+						<!-- <skip>true</skip> -->
 					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<extensions>true</extensions>
+			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-versions-plugin</artifactId>
@@ -109,13 +112,6 @@
 					<!--<skip>true</skip>-->
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-maven-plugin</artifactId>
-				<version>${tycho.version}</version>
-				<extensions>true</extensions>
-			</plugin>
-
 
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -147,7 +143,7 @@
 						<artifact>
 							<groupId>org.eclipse.core.security</groupId>
 							<artifactId>target-platform</artifactId>
-							<version>1.0.3-SNAPSHOT</version>
+							<version>1.0.4-SNAPSHOT</version>
 						</artifact>
 					</target>
 					<environments>
@@ -179,24 +175,6 @@
 					</environments>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-packaging-plugin</artifactId>
-				<version>${tycho.version}</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<id>package-features-qualify</id>
-						<configuration>
-							<strictBinIncludes>true</strictBinIncludes>
-							<format>${tycho.buildqualifier.format}</format>
-							<finalName>
-								${project.artifactId}_${unqualifiedVersion}.${buildQualifier}</finalName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -205,12 +183,13 @@
 
 	<modules>
 
+		<module>parent</module>
 		<module>bundles</module>
-<!--		
 		<module>features</module>
-		<module>p2site</module>
+		<module>sites</module>
+		<module>products</module>
 		<module>tests</module>
--->
+
 	</modules>
 
 	<profiles>

@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<repository name='org.eclipse.core.security.update' type='org.eclipse.equinox.p2.artifact.repository.simpleRepository' version='1'>
+  <properties size='3'>
+	<property name='p2.system' value='true'/>
+    <property name='p2.timestamp' value='${local.p2.timestamp}'/>
+    <!--<property name='p2.uuid' value='${local.uuid}'/>-->
+    <property name='p2.compressed' value='true'/>
+  </properties>
+  <mappings size='2'>
+    <!--<rule filter='(&amp; (classifier=osgi.bundle))' output='${repoUrl}/plugins/${update.id}.jar'/>-->
+    <rule filter='(&amp; (classifier=binary))' output='${repoUrl}/binary/${id}_${version}'/>
+    <rule filter='(&amp; (classifier=org.eclipse.update.feature))' output='${repoUrl}/features/${id}_${version}.jar'/>
+  </mappings>
+  <artifacts size='2'>
+	<artifact classifier='osgi.bundle' id='org.eclipse.core.security' version='1.0.4.${buildQualifier}'>
+    <properties size='9'>
+      <property name='artifact.size' value='81277'/>
+      <property name='download.size' value='81277'/>
+      <property name='download.checksum.sha-512' value='adbeabe373d0f8d429bbb214120a124533a0842f2be750a8c70d2a104444a3dfebf3cb103a4f2e9db84c93ea5af578dca41569836218f5454f367154dd6bb228'/>
+      <property name='download.checksum.sha-1' value='27b28600f92467e5d07b12404ee0900a11e9c69c'/>
+      <property name='download.checksum.sha-256' value='87c150b7cab5e0e184e12320c60b43e9dd589921cddc1af0ac941f82529a6250'/>
+      <property name='maven-groupId' value='security'/>
+      <property name='maven-artifactId' value='org.eclipse.core.security'/>
+      <property name='maven-version' value='1.0.4-SNAPSHOT'/>
+      <property name='maven-type' value='eclipse-plugin'/>
+    </properties>
+  </artifact>
+</artifacts>
+</repository>

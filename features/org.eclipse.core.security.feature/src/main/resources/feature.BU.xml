@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.core.pki.feature"
+      label="PKI Plug-In Security Feature"
+      version="1.0.2.qualifier"
+      provider-name="Delmarva Security">
+
+   <description>
+      PKI Security Features for core and UI
+   </description>
+
+   <copyright>
+      Copyright (c) 2023 Eclipse Platform, Delmarva Security Group and others.
+   </copyright>
+
+   <license url="">
+      Copyright (c) 2023 Eclipse Platform, Security Group and others.
+ 
+  This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License 2.0
+  which accompanies this distribution, and is available at
+  https://www.eclipse.org/legal/epl-2.0/
+ 
+  SPDX-License-Identifier: EPL-2.0
+ 
+  Contributors:
+      Eclipse Platform - initial API and implementation Delmarva Security
+   </license>
+
+   <plugin
+         id="org.eclipse.core.pki"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ui.pki"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

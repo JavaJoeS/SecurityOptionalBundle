@@ -28,7 +28,7 @@ import org.eclipse.core.security.managers.KeyStoreManager;
 import org.eclipse.core.security.util.KeyStoreFormat;
 
 
-public class PkiPasswordGrabberWidget {
+public class PkiPasswordGrabberWidget implements Runnable {
 	JFrame frame = null;
 	Icon icon = null;
 	private static PkiPasswordGrabberWidget INSTANCE;
@@ -40,7 +40,15 @@ public class PkiPasswordGrabberWidget {
 		}
 		return INSTANCE;
 	}
-
+	@Override
+	public void run() {
+		try {
+			String pw = getInput();
+			System.setProperty("javax.net.ssl.keyStorePassword", pw);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	public String getInput() {
 
 		Optional keystoreContainer = null;

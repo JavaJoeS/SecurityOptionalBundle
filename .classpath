@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="p2site"/>
+	<classpathentry kind="src" path="sites"/>
 	<classpathentry kind="src" path="bundles/org.eclipse.core.security/src"/>
-	<classpathentry kind="src" path="bundles/org.eclipse.ui.pki/src"/>
-	<classpathentry kind="src" path="bundles/org.eclipse.core.pki/src"/>
 	<classpathentry kind="src" path="features"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
@@ -13,5 +11,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="var" path="ECLIPSE_HOME"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="output" path="tests/org.eclipse.core.tests.pki/src/org/eclipse/core/pki"/>
+	<classpathentry kind="output" path="tests/org.eclipse.core.tests.security/bin"/>
 </classpath>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.eclipse.core.security.feature_1.0.5.${buildQualifier}.jar" id="org.eclipse.core.security.feature" version="1.0.5.${buildQualifier}">
+      <category name="PKI_Site"/>
+   </feature>
+   <project name="${project.name}"/>
+   <category-def name="PKI_Site" label="Eclipse PKI Core Security"/>
+</site>

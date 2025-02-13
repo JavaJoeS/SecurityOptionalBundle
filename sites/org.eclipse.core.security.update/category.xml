@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.eclipse.core.security.features_1.0.5.qualifier.jar" id="org.eclipse.core.security.feature" version="1.0.5.qualifier">
+      <category name="PKI Security Feature"/>
+   </feature>
+   <feature id="org.eclipse.core.security.feature" version="1.0.5.qualifier"/>
+   <category-def name="pkisecurity" label="PKI Security Plugin Feature"/>
+   
+   <repository-reference location="https://idetoolsio.github.io/core/updatesite" name="PKI Security Update Site" enabled="false" />
+</site>
