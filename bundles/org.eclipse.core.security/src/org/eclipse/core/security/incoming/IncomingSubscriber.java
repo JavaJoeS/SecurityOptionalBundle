@@ -24,6 +24,11 @@ import org.eclipse.core.security.managers.KeyStoreManager;
 import org.eclipse.core.security.managers.KeystoreSetup;
 import org.eclipse.core.security.state.X509SecurityState;
 
+import org.eclipse.ecf.core.security.SSLContextFactory;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 
 public class IncomingSubscriber implements Subscriber {
 	private static IncomingSubscriber INSTANCE;

@@ -4,6 +4,7 @@
   <properties size='2'>
     <property name='p2.timestamp' value='${local.p2.timestamp}'/>
     <!--<property name='p2.uuid' value='${local.uuid}'/>-->
+    <!--<property name='p2.product.qualifier' value='${qualifier}' />-->
     <property name='p2.compressed' value='true'/>
   </properties>
   <references size='2'>
@@ -11,7 +12,7 @@
     <repository uri='${p2.repo.url}' url='${p2.repo.url}' type='1' options='0'/>
   </references>
   <units size='3'>
-    <unit id='org.eclipse.core.security.feature.feature.jar' version='1.0.5.${buildQualifier}'>
+    <unit id='org.eclipse.core.security.feature.feature.jar' version='1.0.5.qualifier'>
       <properties size='7'>
         <property name='org.eclipse.equinox.p2.name' value='Eclipse Core Security Resources'/>
         <property name='org.eclipse.equinox.p2.description' value='PKI Security Features for core'/>
@@ -22,7 +23,7 @@
         <property name='maven-type' value='eclipse-feature'/>
       </properties>
       <provides size='3'>
-        <provided namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.core.security.feature.feature.jar' version='1.0.2.${buildQualifier}'/>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.core.security.feature.feature.jar' version='1.0.5.${buildQualifier}'/>
         <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='feature' version='1.0.0'/>
         <provided namespace='org.eclipse.update.feature' name='org.eclipse.core.security.feature' version='1.0.4.${buildQualifier}'/>
       </provides>

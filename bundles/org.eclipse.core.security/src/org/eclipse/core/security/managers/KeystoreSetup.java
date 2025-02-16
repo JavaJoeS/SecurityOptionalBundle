@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.security.Provider;
 import java.security.SecureRandom;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
@@ -29,6 +30,7 @@ import javax.net.ssl.X509TrustManager;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -50,6 +52,11 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.CoreException;
 
+
+
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 public class KeystoreSetup  {
 	static boolean isPkcs11Installed = false;
 	static boolean isKeyStoreLoaded = false;
@@ -60,6 +67,7 @@ public class KeystoreSetup  {
 	private static final int DIGITAL_SIGNATURE = 0;
 	private static final int KEY_CERT_SIGN = 5;
 	private static final int CRL_SIGN = 6;
+	
 	private static KeystoreSetup INSTANCE;
 	private KeystoreSetup() {}
 	public static KeystoreSetup getInstance() {
@@ -72,7 +80,7 @@ public class KeystoreSetup  {
 		Optional<KeyStore> keystoreContainer = null;
 		
 		try {
-
+			
 			keystoreContainer = Optional.ofNullable(
 					KeyStoreManager.getInstance().getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
 							System.getProperty("javax.net.ssl.keyStorePassword"), //$NON-NLS-1$
@@ -131,6 +139,7 @@ public class KeystoreSetup  {
 	}
 	public void activateSecureContext( KeyManager[] km, TrustManager[] tm ) {
 		try {
+			
 			SSLContext ctx = SSLContext.getInstance("TLS");//$NON-NLS-1$
 			ctx.init(km, tm, null);
 			SSLContext.setDefault(ctx);
@@ -140,12 +149,20 @@ public class KeystoreSetup  {
 			pkiInstance.load();
 			ActivateSecurity.getInstance().setupAdapter();
 			setUserEmail();
-			ActivateSecurity.getInstance().log("default SSLContext adapter has been configured."); //$NON-NLS-1$
+			
+			
+			ActivateSecurity.getInstance().completeSecureContext();
+			//sslContextFactory.getDefault().setDefault(ctx);
+			
+			
+			
+			ActivateSecurity.getInstance().log("SSLContextFactory has been configured with SSLContext default."); //$NON-NLS-1$
 		} catch (KeyManagementException e) {
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
-		}
+		} 
+		ActivateSecurity.getInstance().log("KeystoreSetup EXITING"); //$NON-NLS-1$
 	}
 	public SSLContext getSSLContext() {
 		return INSTANCE.sslContext;

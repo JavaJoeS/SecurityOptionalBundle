@@ -18,8 +18,10 @@ import org.eclipse.core.runtime.ServiceCaller;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
@@ -33,6 +35,7 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.swing.text.html.parser.Element;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -55,10 +58,19 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import org.osgi.service.component.annotations.Activate; 
+import org.osgi.service.component.annotations.Component;
+
+import org.eclipse.ecf.internal.core.ECFPlugin;
+import org.eclipse.ecf.internal.ssl.ECFSSLSocketFactory;
+import org.eclipse.ecf.core.security.SSLContextFactory;
+
 
 public class ActivateSecurity implements BundleActivator, IStartup, ServiceTrackerCustomizer<PublishPasswordUpdateIfc,PublishPasswordUpdateIfc> {
 	public static final String ID = "org.eclipse.core.security"; //$NON-NLS-1$
@@ -66,6 +78,8 @@ public class ActivateSecurity implements BundleActivator, IStartup, ServiceTrack
 	static boolean isPkcs11Installed = false;
 	public static boolean isKeyStoreLoaded = false;
 	private BundleContext context;
+	protected ECFSSLSocketFactory ecfSSLSocketFactory;
+	
 	protected SSLContext sslContext;
 	
 	private ServiceTracker<PublishPasswordUpdateIfc,PublishPasswordUpdateIfc> subscriberServiceTracker;
@@ -114,24 +128,76 @@ public class ActivateSecurity implements BundleActivator, IStartup, ServiceTrack
 		logger.call(logger -> logger.info(message));
 	}
 
+	public BundleContext getContext() {
+		return context;
+	}
 	public void Startup() {
 		/*
 		 * Initialize preliminary PKCS settings
 		 */
+		
 		X509SecurityState.getInstance().setPKCS11on(false);
 		X509SecurityState.getInstance().setPKCS12on(false);
 		try {
+			ActivateSecurity.getInstance().log("ActivateSecurity Begin Controller process.");
 			InBoundController.getInstance().controller();
 		} catch(Exception e) {
 			ActivateSecurity.getInstance().log("ActivateSecurity could not Run.");
-		}
-		// Create and open ITimeService tracker
+		} 
+		
+		
+		ActivateSecurity.getInstance().log("ActivateSecurity Controller process complete.");
+		
+		
+		// Create and open Service tracker
 		this.subscriberServiceTracker = 
 				new ServiceTracker<PublishPasswordUpdateIfc,PublishPasswordUpdateIfc>(
 						ActivateSecurity.getInstance().context,
 						PublishPasswordUpdateIfc.class,this);
 		this.subscriberServiceTracker.open();
 	}
+	
+	public void completeSecureContext() {
+		//containerContext();
+		
+		ActivateSecurity.getInstance().log("ActivateSecurity setup SSLContextFactory.");
+		BundleContext ecfContext = ECFPlugin.getDefault().getContext();
+		
+		extractServicesInfo( ecfContext.getBundle(), ecfContext);
+		
+		try {
+			ecfSSLSocketFactory = (ECFSSLSocketFactory) ecfContext.getServiceReference(ECFSSLSocketFactory.class);
+			ActivateSecurity.getInstance().log("ActivateSecurity service access done SSLSocketFactory.");
+			TimeUnit.SECONDS.sleep(10);
+			ecfSSLSocketFactory.getSSLContext("TLS").setDefault( SSLContext.getDefault() );
+			
+			SSLContext sctx = ecfSSLSocketFactory.getSSLContext("TLS");
+			ActivateSecurity.getInstance().log("ActivateSecurity Got the context.");
+			sctx.setDefault( SSLContext.getDefault());
+			
+			ActivateSecurity.getInstance().log("ActivateSecurity SSLContext for TLS has been set.");
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	// Fetching ServiceReferernces exposed by the bundle
+   public static void extractServicesInfo(Bundle bundle, BundleContext bundleContext) {
+       ServiceReference[] registeredServices = bundle.getRegisteredServices();
+       if (registeredServices != null) {
+           for (ServiceReference registeredService : bundle.getRegisteredServices()) {
+               // Fetching any property of the Service
+               ActivateSecurity.getInstance().log("service.pid: " + registeredService.getProperty("service.pid"));
+ 
+               // Fetch Service from ServiceReference
+               ActivateSecurity.getInstance().log("Service: " + bundleContext.getService(registeredService));
+           }
+       }
+   }
 
 	public SSLContext getSSLContext() {
 		return sslContext;
