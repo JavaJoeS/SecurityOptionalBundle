@@ -46,9 +46,6 @@ import org.eclipse.core.security.managers.KeyStoreManager;
 import org.eclipse.core.security.managers.ConfigureTrust;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdapterFactory;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.CoreException;
 
@@ -147,11 +144,11 @@ public class KeystoreSetup  {
 			setSSLContext(ctx);
 			pkiInstance = PKIProperties.getInstance();
 			pkiInstance.load();
-			ActivateSecurity.getInstance().setupAdapter();
+			ActivateSecurity.getInstance().setSSLContext(ctx);
 			setUserEmail();
 			
 			
-			ActivateSecurity.getInstance().completeSecureContext();
+			//ActivateSecurity.getInstance().completeSecureContext();
 			//sslContextFactory.getDefault().setDefault(ctx);
 			
 			
@@ -162,7 +159,6 @@ public class KeystoreSetup  {
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} 
-		ActivateSecurity.getInstance().log("KeystoreSetup EXITING"); //$NON-NLS-1$
 	}
 	public SSLContext getSSLContext() {
 		return INSTANCE.sslContext;
@@ -223,33 +219,4 @@ public class KeystoreSetup  {
 			return false;
 		}
 	}
-
-//	private void setupAdapter() {
-//		
-//		IAdapterFactory pr = new IAdapterFactory() {
-//	        @Override
-//	        public Class[] getAdapterList() {
-//	                return new Class[] { SSLContext.class };
-//	        }
-//	        
-//			@Override
-//			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-//					IResource res = (IResource) adaptableObject;
-//					SSLContext v = null;
-//					QualifiedName key = new QualifiedName("org.eclipse.core.pki", "context");
-//					try {
-//						v = (SSLContext) res.getSessionProperty(key);
-//						if (v == null) {
-//							v = getSSLContext();
-//							res.setSessionProperty(key, v);
-//						}
-//					} catch (CoreException e) {
-//						// unable to access session property - ignore
-//					}
-//					return (T)v;
-//			}
-//		};
-//		Platform.getAdapterManager().registerAdapters(pr,IResource.class);
-//	}
-
 }

@@ -67,9 +67,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.osgi.service.component.annotations.Activate; 
 import org.osgi.service.component.annotations.Component;
 
-import org.eclipse.ecf.internal.core.ECFPlugin;
-import org.eclipse.ecf.internal.ssl.ECFSSLSocketFactory;
-import org.eclipse.ecf.core.security.SSLContextFactory;
+//import org.eclipse.ecf.internal.core.ECFPlugin;
+//import org.eclipse.ecf.internal.ssl.ECFSSLSocketFactory;
+//import org.eclipse.ecf.core.security.SSLContextFactory;
 
 
 public class ActivateSecurity implements BundleActivator, IStartup, ServiceTrackerCustomizer<PublishPasswordUpdateIfc,PublishPasswordUpdateIfc> {
@@ -161,25 +161,22 @@ public class ActivateSecurity implements BundleActivator, IStartup, ServiceTrack
 		//containerContext();
 		
 		ActivateSecurity.getInstance().log("ActivateSecurity setup SSLContextFactory.");
-		BundleContext ecfContext = ECFPlugin.getDefault().getContext();
+		//BundleContext ecfContext = ECFPlugin.getDefault().getContext();
 		
-		extractServicesInfo( ecfContext.getBundle(), ecfContext);
+		//extractServicesInfo( ecfContext.getBundle(), ecfContext);
 		
 		try {
-			ecfSSLSocketFactory = (ECFSSLSocketFactory) ecfContext.getServiceReference(ECFSSLSocketFactory.class);
-			ActivateSecurity.getInstance().log("ActivateSecurity service access done SSLSocketFactory.");
-			TimeUnit.SECONDS.sleep(10);
-			ecfSSLSocketFactory.getSSLContext("TLS").setDefault( SSLContext.getDefault() );
+			//ecfSSLSocketFactory = (ECFSSLSocketFactory) ecfContext.getServiceReference(ECFSSLSocketFactory.class);
+			//ActivateSecurity.getInstance().log("ActivateSecurity service access done SSLSocketFactory.");
+			//TimeUnit.SECONDS.sleep(10);
+			//ecfSSLSocketFactory.getSSLContext("TLS").setDefault( SSLContext.getDefault() );
 			
-			SSLContext sctx = ecfSSLSocketFactory.getSSLContext("TLS");
-			ActivateSecurity.getInstance().log("ActivateSecurity Got the context.");
-			sctx.setDefault( SSLContext.getDefault());
+			//SSLContext sctx = ecfSSLSocketFactory.getSSLContext("TLS");
+			//ActivateSecurity.getInstance().log("ActivateSecurity Got the context.");
+			//sctx.setDefault( SSLContext.getDefault());
 			
-			ActivateSecurity.getInstance().log("ActivateSecurity SSLContext for TLS has been set.");
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
+			//ActivateSecurity.getInstance().log("ActivateSecurity SSLContext for TLS has been set.");
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -246,42 +243,5 @@ public class ActivateSecurity implements BundleActivator, IStartup, ServiceTrack
 	public void removedService(ServiceReference<PublishPasswordUpdateIfc> reference,
 			PublishPasswordUpdateIfc service) {
 		System.out.println("SubscriberService undiscovered!");
-	}
-
-	public void setupAdapter() {
-	
-		IAdapterFactory pr = new IAdapterFactory() {
-	        @Override
-	        public Class[] getAdapterList() {
-	                return new Class[] { SSLContext.class };
-	        }
-	        
-			@Override
-			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-					IResource res = (IResource) adaptableObject;
-					SSLContext v = null;
-					QualifiedName key = new QualifiedName("org.eclipse.core.security", "context");//$NON-NLS-1$
-					try {
-						v = (SSLContext) res.getSessionProperty(key);
-						if (v == null) {
-							v = getSSLContext();
-							res.setSessionProperty(key, v);
-						}
-					} catch (CoreException e) {
-						// unable to access session property - ignore
-					}
-					return (T)v;
-			}
-		};
-		Platform.getAdapterManager().registerAdapters(pr,IResource.class);
-	}
-	public void activateSubscriber() {
-//		Properties props = new Properties();
-//		// add OSGi service property indicated export of all interfaces exposed by service (wildcard)
-//		props.put(IDistributionConstants.SERVICE_EXPORTED_INTERFACES,IDistributionConstants.SERVICE_EXPORTED_INTERFACES_WILDCARD);
-//		// add OSGi service property specifying config
-//		props.put(IDistributionConstants.SERVICE_EXPORTED_CONFIGS, containerType);
-//		// register remote service
-//		helloRegistration = bundleContext.registerService(IHello.class.getName(), new Hello(), props);
 	}
 }

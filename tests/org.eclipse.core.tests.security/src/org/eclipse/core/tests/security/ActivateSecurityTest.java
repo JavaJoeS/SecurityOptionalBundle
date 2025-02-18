@@ -66,7 +66,7 @@ class ActivateSecurityTest {
 	}
 	@Test
 	void testActivateSubscriber() {
-		activateSecurityMock.getInstance().activateSubscriber();
+		activateSecurityMock.getInstance().completeSecureContext();
 	}
 
 }
