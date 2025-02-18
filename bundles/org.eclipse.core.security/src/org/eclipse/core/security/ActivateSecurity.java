@@ -78,7 +78,7 @@ public class ActivateSecurity implements BundleActivator, IStartup, ServiceTrack
 	static boolean isPkcs11Installed = false;
 	public static boolean isKeyStoreLoaded = false;
 	private BundleContext context;
-	protected ECFSSLSocketFactory ecfSSLSocketFactory;
+	//protected ECFSSLSocketFactory ecfSSLSocketFactory;
 	
 	protected SSLContext sslContext;
 	
