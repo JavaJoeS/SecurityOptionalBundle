@@ -13,6 +13,11 @@
  *******************************************************************************/
 package org.eclipse.core.security.util;
 
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
+
+
+@Component(scope=ServiceScope.SINGLETON)
 public class PKI {
 	private String keyStore = ""; //$NON-NLS-1$
 	private String keyStoreType = ""; //$NON-NLS-1$

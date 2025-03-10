@@ -20,21 +20,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
+
+@Component(scope=ServiceScope.SINGLETON)
 public class TemplateForPKIfile {
 	
-	private static TemplateForPKIfile INSTANCE;
 	public final String hashTag = "############################################################"; //$NON-NLS-1$
 	public final String shortHashTag = "################"; //$NON-NLS-1$
 	public static final String DotEclipse = ".eclipse";//$NON-NLS-1$
 	public final String USER_HOME = System.getProperty("user.home"); //$NON-NLS-1$
 	Path userM2Home = null;
-	private TemplateForPKIfile() {}
-	public static TemplateForPKIfile getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new TemplateForPKIfile();
-		}
-		return INSTANCE;
-	}
+	public TemplateForPKIfile() {}
+	
 	public void setup() {
 		try {
 			Path path = Paths.get(USER_HOME+
@@ -95,6 +93,7 @@ public class TemplateForPKIfile {
 	}
 
 	public static void main(String[] args) {
-		TemplateForPKIfile.getInstance().setup();
+		TemplateForPKIfile tmpl = new TemplateForPKIfile();
+		tmpl.setup();
 	}
 }

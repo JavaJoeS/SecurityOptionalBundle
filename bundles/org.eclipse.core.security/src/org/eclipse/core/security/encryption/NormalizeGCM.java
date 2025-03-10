@@ -24,20 +24,22 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
+
+
+
+@Component(scope=ServiceScope.SINGLETON)
 public class NormalizeGCM {
 	private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding"; //$NON-NLS-1$
 	private static final String FACTORY_INSTANCE = "PBKDF2WithHmacSHA512"; //$NON-NLS-1$
 	private static final int GCM_IV_LENGTH = 12;
 	private static final int KEY_LENGTH = 256;
 	private static final int ITERATION_COUNT = 65536;
-	private static NormalizeGCM DECRYPT;
-	private NormalizeGCM() {}
-	public static NormalizeGCM getInstance() {
-		if (DECRYPT == null) {
-			DECRYPT = new NormalizeGCM();
-		}
-		return DECRYPT;
-	}
+	
+	public NormalizeGCM() {}
+	
+	
 	public String decrypt(String strToDecrypt, String secretKey, String salt) {
 		try {
 			byte[] encryptedData = Base64.getDecoder().decode(strToDecrypt);

@@ -33,6 +33,7 @@ import javax.net.ssl.X509KeyManager;
 
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import org.eclipse.core.security.identification.FingerprintX509;
 
@@ -42,6 +43,7 @@ import org.eclipse.core.security.identification.FingerprintX509;
 public class CustomKeyManager extends X509ExtendedKeyManager implements X509KeyManager {
 	private static final int KEY_ENCIPHERMENT = 2;
 	private static final int DIGITAL_SIGNATURE = 0;
+	@Reference FingerprintX509 fingerprintX509;
 	private KeyStore keyStore;
 	private char[] password;
 	protected static String selectedFingerprint = "NOTSET"; //$NON-NLS-1$
@@ -64,6 +66,9 @@ public class CustomKeyManager extends X509ExtendedKeyManager implements X509KeyM
 
 		try {
 
+			if ( fingerprintX509 == null ) {
+				fingerprintX509 = new FingerprintX509();
+			}
 
 			Enumeration<String> aliases = this.keyStore.aliases();
 			sb.append(message);
@@ -74,7 +79,7 @@ public class CustomKeyManager extends X509ExtendedKeyManager implements X509KeyM
 					try {
 						x509.checkValidity();
 						if (!(isKeyEncipherment(x509.getKeyUsage()))) {
-							fingerprint = FingerprintX509.getInstance().getFingerPrint(x509, "MD5"); //$NON-NLS-1$
+							fingerprint = fingerprintX509.getFingerPrint(x509, "MD5"); //$NON-NLS-1$
 
 							if ( getSelectedFingerprint() != null ) {
 								if (getSelectedFingerprint().equals("NOTSET")) { //$NON-NLS-1$

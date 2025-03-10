@@ -24,6 +24,11 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
+
+
+@Component(scope=ServiceScope.SINGLETON)
 public class SecureGCM {
 
 	private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding"; //$NON-NLS-1$
@@ -31,14 +36,8 @@ public class SecureGCM {
 	private static final int GCM_IV_LENGTH = 12;
 	private static final int KEY_LENGTH = 256;
 	private static final int ITERATION_COUNT = 65536;
-	private static SecureGCM ENCRYPT;
-	private SecureGCM() {}
-	public static SecureGCM getInstance() {
-		if (ENCRYPT == null) {
-			ENCRYPT = new SecureGCM();
-		}
-		return ENCRYPT;
-	}
+
+	public SecureGCM() {}
 
 	public String encrypt(String strToEncrypt, String secretKey, String salt) {
 		try {

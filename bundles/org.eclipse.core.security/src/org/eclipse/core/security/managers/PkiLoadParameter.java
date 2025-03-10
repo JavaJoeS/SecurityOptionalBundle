@@ -18,6 +18,13 @@ import java.security.KeyStore.ProtectionParameter;
 
 import javax.security.auth.callback.CallbackHandler;
 
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.ComponentContext;
+
+@Component(scope=ServiceScope.SINGLETON)
 public class PkiLoadParameter implements LoadStoreParameter{
 	ProtectionParameter protectionParameter;
 	ProtectionParameter SOProtectionParameter;

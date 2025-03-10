@@ -14,6 +14,7 @@
 package org.eclipse.core.security.util;
 
 import java.security.KeyStore;
+
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -23,20 +24,16 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
 
-
+@Component(scope=ServiceScope.SINGLETON)
 public class EclipseKeyStoreCollection {
-	private static EclipseKeyStoreCollection INSTANCE;
 	protected final int DIGITAL_SIGNATURE=0;
 	private final int KEY_ENCIPHERMENT = 2;
-	protected static PKIProperties pkiProperties=PKIProperties.getInstance();;
-	private EclipseKeyStoreCollection() {}
-	public static EclipseKeyStoreCollection getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new EclipseKeyStoreCollection();
-		}
-		return INSTANCE;
-	}
+	public EclipseKeyStoreCollection() {}
+	
+	
 	public ArrayList getList(KeyStore keyStore) {
 		ArrayList list = new ArrayList<String>();
 		try {
