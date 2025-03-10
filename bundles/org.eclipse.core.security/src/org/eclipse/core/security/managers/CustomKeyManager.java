@@ -31,8 +31,14 @@ import java.util.HashMap;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509KeyManager;
 
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
+
 import org.eclipse.core.security.identification.FingerprintX509;
 
+
+
+@Component(scope=ServiceScope.SINGLETON)
 public class CustomKeyManager extends X509ExtendedKeyManager implements X509KeyManager {
 	private static final int KEY_ENCIPHERMENT = 2;
 	private static final int DIGITAL_SIGNATURE = 0;

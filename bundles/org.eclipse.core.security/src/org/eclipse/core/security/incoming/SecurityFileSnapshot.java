@@ -33,6 +33,9 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -265,7 +268,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 							PublishPasswordUpdate publishPasswordUpdate = new PublishPasswordUpdate();
 							publishPasswordUpdate.subscribe(subscriber);
 							
-							SecurityComponent c = (SecurityComponent) SecurityComponent.getSecurityComponentIfc();
+//							SecurityComponent c = (SecurityComponent) SecurityComponent.getSecurityComponentIfc();
 //							c.setRunning(true);
 //							if ( c.isRunning()) {
 //								ActivateSecurity.getInstance().log("SecurityFileSnapshot RUNNING");
@@ -273,8 +276,14 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 							
 							
 							PkiPasswordGrabberWidget runner = new PkiPasswordGrabberWidget();
-							Thread t1 = new Thread(runner);
-							t1.start();
+							//Thread t1 = new Thread(runner);
+							//t1.start();
+							
+							ExecutorService es = Executors.newCachedThreadPool();
+							es.execute(runner);
+							es.shutdown();
+							boolean finished = es.awaitTermination(1, TimeUnit.MINUTES);
+							ActivateSecurity.getInstance().log("SecurityFileSnapshot Subscribe RETURNED ");
 							
 						} catch(Exception xe) {
 							// User may have said cancel

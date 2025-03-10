@@ -29,7 +29,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.ComponentContext;
-
+import org.eclipse.core.security.ActivateSecurity;
 import org.eclipse.core.security.managers.KeyStoreManager;
 import org.eclipse.core.security.util.KeyStoreFormat;
 
@@ -60,15 +60,19 @@ public class PkiPasswordGrabberWidget implements Runnable {
 	}
 	public String getInput() {
 
-		Optional keystoreContainer = null;
+		Optional keystoreContainer = null;		
 		JPanel panel = new JPanel();
 		JLabel label = new JLabel("Enter Password:");//$NON-NLS-1$
 		JLabel blankie = new JLabel("\n", SwingConstants.CENTER);//$NON-NLS-1$
 		pword = new JPasswordField(17);
 		String pw=null;
+		if ( keyStoreManager == null ) {
+			keyStoreManager=new KeyStoreManager();
+		}
 		panel.add(label);
 		panel.add(blankie);
 		panel.add(pword);
+		
 		try {
 			
 			icon = new ImageIcon(getClass().getResource("/icons/icons8-password-48.png"));//$NON-NLS-1$
@@ -106,10 +110,17 @@ public class PkiPasswordGrabberWidget implements Runnable {
 				if ((keystoreContainer.isEmpty()) || (!(keyStoreManager.isKeyStoreInitialized()))) {
 					JOptionPane.showMessageDialog(null,"Incorrect Password",null,
 	                        JOptionPane.ERROR_MESSAGE);//$NON-NLS-1$
+					
+					ActivateSecurity.getInstance().log("PkiPasswordGrabberWidget NO KEYSTORE FOUND");
+					
 					System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
 					pword.setText("");//$NON-NLS-1$
+					
 				} else {
+					ActivateSecurity.getInstance().log("PkiPasswordGrabberWidget KEYSTORE FOUND");
+					
 					PublishPasswordUpdate.publishMessage(pw);
+					
 					break;
 				}
 			} else {

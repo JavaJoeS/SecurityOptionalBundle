@@ -18,17 +18,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
+
+@Component(scope=ServiceScope.SINGLETON)
 public class FingerprintX509 {
-	private static FingerprintX509 INSTANCE;
 	private static final char[] HEX= {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
 	private static final String cryptoAlg = "SHA-256"; //$NON-NLS-1$
-	private FingerprintX509() {}
-	public static FingerprintX509 getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new FingerprintX509();
-		}
-		return INSTANCE;
-	}
+	public FingerprintX509() {}
 	
 	public String getFingerPrint(Certificate cert, String alg) {
 		String fingerPrint=null;

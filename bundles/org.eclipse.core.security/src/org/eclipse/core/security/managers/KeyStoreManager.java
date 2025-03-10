@@ -66,7 +66,7 @@ public class KeyStoreManager implements X509KeyManager {
 	@Activate
 	void activate() {
 		ActivateSecurity.getInstance().log("KeyStoreManager activate"); //$NON-NLS-1$
-		FrameworkUtil.getBundle(SecurityComponent.class).getBundleContext();
+		//FrameworkUtil.getBundle(SecurityComponent.class).getBundleContext();
 	}
 	
 	public KeyStore getKeyStore(String fileLocation, String password, KeyStoreFormat format) {
@@ -288,6 +288,9 @@ public class KeyStoreManager implements X509KeyManager {
 		boolean isOK = true;
 
 		try {
+			if (fingerprintX509 == null ) {
+				fingerprintX509 = new FingerprintX509();
+			}
 
 			Enumeration<String> aliases = this.keyStore.aliases();
 			sb.append(message);
@@ -299,7 +302,7 @@ public class KeyStoreManager implements X509KeyManager {
 					try {
 						x509.checkValidity();
 						if (!(isKeyEncipherment(x509.getKeyUsage()))) {
-							fingerprint = FingerprintX509.getInstance().getFingerPrint(x509, "SHA-256"); //$NON-NLS-1$
+							fingerprint = fingerprintX509.getFingerPrint(x509, "SHA-256"); //$NON-NLS-1$
 							if (getSelectedFingerprint() != null) {
 								if (getSelectedFingerprint().equals("NOTSET")) { //$NON-NLS-1$
 									setSelectedFingerprint(fingerprint);

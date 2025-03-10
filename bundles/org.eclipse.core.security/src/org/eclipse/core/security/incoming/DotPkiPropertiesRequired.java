@@ -27,20 +27,17 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
+
 import org.eclipse.core.security.ActivateSecurity;
 
+@Component(scope=ServiceScope.SINGLETON)
 public class DotPkiPropertiesRequired {
 	
-	private static DotPkiPropertiesRequired INSTANCE;
 	List<String> list = get();
-	private DotPkiPropertiesRequired() {}
+	public DotPkiPropertiesRequired() {}
 	
-	public static DotPkiPropertiesRequired getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new DotPkiPropertiesRequired();
-		}
-		return INSTANCE;
-	}
 	
 	public boolean testFile(Path path) {
 		Properties properties=new Properties();
