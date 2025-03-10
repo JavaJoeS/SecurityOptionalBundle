@@ -23,24 +23,49 @@ import org.eclipse.core.security.managers.AuthenticationBase;
 import org.eclipse.core.security.managers.KeyStoreManager;
 import org.eclipse.core.security.managers.KeystoreSetup;
 import org.eclipse.core.security.state.X509SecurityState;
+import org.eclipse.core.security.state.X509SecurityStateIfc;
 
-import org.eclipse.ecf.core.security.SSLContextFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ServiceScope;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
+/*
+ *  Class to use for Publish paradigm in Pub/Sub 
+ */
 
-public class IncomingSubscriber implements Subscriber {
-	private static IncomingSubscriber INSTANCE;
+@Component(scope=ServiceScope.SINGLETON)
+public class IncomingSubscriber implements  IncomingSubscriberIfc {
+	
+	SecurityFileSnapshot securityFileSnapshot;
+	@Reference AuthenticationBase authenticationBase;
+	@Reference KeystoreSetup keystoreSetup;
+	@Reference KeyStoreManager keyStoreManager;
+	@Reference X509SecurityStateIfc x509SecurityStateIfc;
+	@Reference IncomingSystemPropertyIfc incomingSystemPropertyIfc;
+	IncomingSystemProperty incomingProperty;
 	protected final String pin = "#Gone2Boat@Bay"; //$NON-NLS-1$
 	Optional<KeyStore> keystoreContainer = null;//$NON-NLS-1$
 	protected static KeyStore keyStore = null;//$NON-NLS-1$
-	public static IncomingSubscriber getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new IncomingSubscriber();
+	public IncomingSubscriber() {}
+	
+	@Activate
+	void activate() {
+		//new IncomingSubscriber();
+		
+		try {
+			//setup = new KeystoreSetup();
+			if ( incomingSystemPropertyIfc == null ) {
+				ActivateSecurity.getInstance().log("IncomingSubscriber incomingproperties are set to NULL.");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return INSTANCE;
+		ActivateSecurity.getInstance().log("IncomingSubscriber Instance SETUP Done.");
 	}
+	
 	@Override
 	public void onSubscribe(Subscription subscription) {	
 	}
@@ -52,45 +77,64 @@ public class IncomingSubscriber implements Subscriber {
 		Optional<String> keystoreTypeContainer = null;
 		Optional<String> decryptedPw;
 		ActivateSecurity.getInstance().log("IncomingSubscriber processing event.");
+		if ( incomingSystemPropertyIfc == null ) {
+			incomingSystemPropertyIfc = new IncomingSystemProperty();
+		}
+		if (x509SecurityStateIfc == null ) {
+			x509SecurityStateIfc = new X509SecurityState();
+		}
+		if (keystoreSetup == null ) {
+			keystoreSetup= new KeystoreSetup();
+		}
 		
-		if (IncomingSystemProperty.getInstance().checkType()) {
-			if (IncomingSystemProperty.getInstance().checkKeyStore(pin)) {
-				KeystoreSetup setup = KeystoreSetup.getInstance();
-				if (X509SecurityState.getInstance().isTrustOn()) {
-					setup.installKeystore();
-					setup.setPkiContext();
-				}
-				if (X509SecurityState.getInstance().isPKCS12on()) {
-					setup.installKeystore();
-					setup.setPkiContext();
-				}
-				if (X509SecurityState.getInstance().isPKCS11on()) {
-					String pkcs11Pin = "";//$NON-NLS-1$
-					ActivateSecurity.getInstance().log("Processing PKCS11 setup.");//$NON-NLS-1$
+		
+		try {
+			if (incomingSystemPropertyIfc.checkType()) {
+				if (incomingSystemPropertyIfc.checkKeyStore(pin)) {
 					
-					decryptedPw = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword"));
-					if (!decryptedPw.isEmpty()) {
-						pkcs11Pin = decryptedPw.get();
-					}
-					keystoreContainer = Optional
-							.ofNullable(AuthenticationBase.getInstance().initialize(pkcs11Pin.toCharArray()));// $NON-NLS-1$
-					if (keystoreContainer.isEmpty()) {
-						ActivateSecurity.getInstance().log("Failed to Load a Keystore."); //$NON-NLS-1$
-						X509SecurityState.getInstance().setPKCS11on(false);
-						System.clearProperty("javax.net.ssl.keyStoreType"); //$NON-NLS-1$
-						System.clearProperty("javax.net.ssl.keyStore"); //$NON-NLS-1$
-						System.clearProperty("javax.net.ssl.keyStoreProvider"); //$NON-NLS-1$
-						System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
-						SecurityFileSnapshot.getInstance().restoreProperties();
+					if (x509SecurityStateIfc.isTrustOn()) {
+						keystoreSetup.installKeystore();
+						keystoreSetup.setPkiContext();
 					} else {
-						ActivateSecurity.getInstance().log("A Keystore and Password are detected."); //$NON-NLS-1$
-						keyStore = keystoreContainer.get();
-						KeyStoreManager.getInstance().setKeyStore(keyStore);
-						ActivateSecurity.getInstance().setKeyStoreLoaded(true);
-						setup.setPkiContext();
+						ActivateSecurity.getInstance().log("IncomingSubscriber TRUST IS NOT ON.");
+					}
+					if (x509SecurityStateIfc.isPKCS12on()) {
+						keystoreSetup.installKeystore();
+						keystoreSetup.setPkiContext();
+					} else {
+						ActivateSecurity.getInstance().log("IncomingSubscriber PKCS12 is NOT TURNED ON.");
+					}
+					if (x509SecurityStateIfc.isPKCS11on()) {
+						String pkcs11Pin = "";//$NON-NLS-1$
+						ActivateSecurity.getInstance().log("Processing PKCS11 setup.");//$NON-NLS-1$
+						
+						decryptedPw = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword"));
+						if (!decryptedPw.isEmpty()) {
+							pkcs11Pin = decryptedPw.get();
+						}
+						keystoreContainer = Optional
+								.ofNullable(authenticationBase.initialize(pkcs11Pin.toCharArray()));// $NON-NLS-1$
+						if (keystoreContainer.isEmpty()) {
+							ActivateSecurity.getInstance().log("Failed to Load a Keystore."); //$NON-NLS-1$
+							x509SecurityStateIfc.setPKCS11on(false);
+							System.clearProperty("javax.net.ssl.keyStoreType"); //$NON-NLS-1$
+							System.clearProperty("javax.net.ssl.keyStore"); //$NON-NLS-1$
+							System.clearProperty("javax.net.ssl.keyStoreProvider"); //$NON-NLS-1$
+							System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
+							securityFileSnapshot.restoreProperties();
+						} else {
+							ActivateSecurity.getInstance().log("A Keystore and Password are detected."); //$NON-NLS-1$
+							keyStore = keystoreContainer.get();
+							keyStoreManager.setKeyStore(keyStore);
+							//ActivateSecurity.getInstance().setKeyStoreLoaded(true);
+							keystoreSetup.setPkiContext();
+						}
 					}
 				}
 			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	@Override

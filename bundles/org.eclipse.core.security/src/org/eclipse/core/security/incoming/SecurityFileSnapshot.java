@@ -18,7 +18,6 @@ import java.io.OutputStream;
 import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -34,33 +33,107 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.security.ActivateSecurity;
+import org.eclipse.core.security.SecurityComponent;
+import org.eclipse.core.security.SecurityComponentIfc;
 import org.eclipse.core.security.encryption.NormalizeGCM;
 import org.eclipse.core.security.encryption.SecureGCM;
 import org.eclipse.core.security.encryption.SecurityOpRequest;
 import org.eclipse.core.security.identification.PkiPasswordGrabberWidget;
 import org.eclipse.core.security.identification.PublishPasswordUpdate;
+import org.eclipse.core.security.state.X509SecurityState;
+import org.eclipse.core.security.state.X509SecurityStateIfc;
 
-public class SecurityFileSnapshot {
-	
-	private static SecurityFileSnapshot INSTANCE;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
+
+
+/*
+ * This Singleton checks for the presence of a file in your .eclipse directory named .pki
+ * and reads it in if its there, otherwise nothing.
+ */
+
+//@Component(immediate=true,
+@Component(
+	service=SecurityComponentIfc.class, 
+	scope=ServiceScope.SINGLETON)
+public class SecurityFileSnapshot implements SecurityComponentIfc {
+	private static AtomicInteger instanceCounter = new AtomicInteger();
+	private static AtomicBoolean loaded = new AtomicBoolean();
+	private int instanceNo=0;
 	Path pkiFile = null;
+	boolean securityConnection=false;
+	boolean isrunning=false;
 	Path userM2Home = null;
 	Path userHome = null;
 	Path userDotEclipseHome = null;
+	protected final String pin = "#Gone2Boat@Bay"; //$NON-NLS-1$
+	protected byte[] salt = new byte[16];
 	Properties originalProperties = new Properties();
 	public static final String DotEclipse = ".eclipse";
 	public static final String USER_HOME = System.getProperty("user.home"); //$NON-NLS-1$
+	@Reference SecurityOpRequest securityOpRequest;
+	@Reference X509SecurityStateIfc x509SecurityStateIfc;
+	@Reference IncomingSystemPropertyIfc incomingProperty;
+	@Reference IncomingSubscriber subscriber;
+	@Reference InBoundController inBoundController;
 	
-	private SecurityFileSnapshot() {}
-	
-	public static SecurityFileSnapshot getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new SecurityFileSnapshot();
-		}
-		return INSTANCE;
+	public SecurityFileSnapshot() {
+		ActivateSecurity.getInstance().log("SecurityFileSnapshot CONTRUCTOR."); //$NON-NLS-1$
+		instanceNo = instanceCounter.incrementAndGet(); 
 	}
+	
+	@Activate
+	void activate(BundleContext context) {
+		ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate INSTANCE#"+instanceNo); //$NON-NLS-1$
+		
+		
+		try {
+			if ( context != null ) {
+				ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context"); //$NON-NLS-1$
+				//context.registerService(SecurityComponentIfc.class, this, null );
+				//ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context done"); //$NON-NLS-1$
+			}
+			
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	public boolean isRunning() {
+		ActivateSecurity.getInstance().log("SecurityFileSnapshot isrunning."); //$NON-NLS-1$
+		return isrunning;
+	}
+	public void startup() {
+		ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- startup isLOADED:"+loaded.get()); //$NON-NLS-1$
+		
+		if (loaded.get()) {
+			return;
+		} else {
+			loaded.set(true);
+		}
+		
+		if ( x509SecurityStateIfc == null) {
+			x509SecurityStateIfc=new X509SecurityState();
+		}
+		
+		if ( image() ) {
+			salt = new String(System.getProperty("user.name") + pin).getBytes(); //$NON-NLS-1$
+			load(pin, new String(salt));
+		} else {
+			ActivateSecurity.getInstance().log("SecurityFileSnapshot DEACTIVATEd."); //$NON-NLS-1$
+		}
+	}
+
 	public boolean image() {
 		/*
 		 * CHeck if .pki file is present.
@@ -70,13 +143,16 @@ public class SecurityFileSnapshot {
 			if (!(eclipseHome.isEmpty())) {
 				if (Files.exists(Paths.get(USER_HOME + FileSystems.getDefault().getSeparator() + DotEclipse
 						+ FileSystems.getDefault().getSeparator() + ".pki"))) {
-
+					
+					ActivateSecurity.getInstance().log("SecurityFileSnapshot loading");
 					userDotEclipseHome = Paths.get(USER_HOME + FileSystems.getDefault().getSeparator() + DotEclipse
 							+ FileSystems.getDefault().getSeparator() + ".pki");
-					if (!DotPkiPropertiesRequired.getInstance().testFile(userDotEclipseHome)) {
-						TemplateForPKIfile.getInstance().setup();
-						return false;
-					}
+					
+//					if (!DotPkiPropertiesRequired.getInstance().testFile(userDotEclipseHome)) {
+//						TemplateForPKIfile.getInstance().setup();
+//						ActivateSecurity.getInstance().log("SecurityFileSnapshot loading poookooo");
+//						return false;
+//					}
 				} else {
 					/*
 					 *  This would be the completion of this bundle,
@@ -94,9 +170,8 @@ public class SecurityFileSnapshot {
 			}
 
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			//  No User home could be found.  No PKI has been setup, so no worries.
 		}
-		
 		if (Files.exists(userDotEclipseHome)) {
 			ActivateSecurity.getInstance().log("A PKI config file detected;"+ userDotEclipseHome.toString());// $NON-NLS-1$
 			return true;
@@ -132,17 +207,25 @@ public class SecurityFileSnapshot {
 		Properties properties = new Properties();
 		String passwd = null;
 		try {
-			IncomingSubscriber subscriber = IncomingSubscriber.getInstance();
+			
+			subscriber = new IncomingSubscriber();
 			FileChannel fileChannel = FileChannel.open(userDotEclipseHome, StandardOpenOption.READ);
 			FileChannel updateChannel = FileChannel.open(userDotEclipseHome, StandardOpenOption.WRITE);
-			FileLock lock = fileChannel.lock(0L, Long.MAX_VALUE, true);
+			
+			//FileLock lock = fileChannel.lock(0L, Long.MAX_VALUE, true);
+			
 			InputStream fileInputStream = Channels.newInputStream(fileChannel);
 			properties.load(fileInputStream);
 			originalProperties.putAll(properties);
+			
+			
 			for (Entry<Object, Object> entry : properties.entrySet()) {
+				//ActivateSecurity.getInstance().log("SecurityFileSnapshot preoperty:"+entry.toString());
 				entry.setValue(entry.getValue().toString().trim());
 			}
 			
+			ActivateSecurity.getInstance().log("SecurityFileSnapshot preoperty keyStoreType:"+properties.getProperty("javax.net.ssl.keyStoreType"));
+			ActivateSecurity.getInstance().log("SecurityFileSnapshot  properties all loaded--------");
 			Optional<String> passwdContainer = Optional
 					.ofNullable(properties.getProperty("javax.net.ssl.keyStorePassword")); //$NON-NLS-1$
 			Optional<String> encryptedPasswd = Optional
@@ -152,13 +235,17 @@ public class SecurityFileSnapshot {
 						properties.getProperty("javax.net.ssl.keyStore")); //$NON-NLS-1$
 				if (!(keyStoreContainer.isEmpty() )) {
 					System.setProperty("javax.net.ssl.keyStore", keyStoreContainer.get().toString().trim());
+				} else {
+					return null;
 				}
 				Optional<String> keyStoreTypeContainer = Optional.ofNullable(
 						properties.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
 				if (!(keyStoreTypeContainer.isEmpty() )) {
+					
 					String keyStoreType = keyStoreTypeContainer.get().toString().trim();
 					if (keyStoreType.equalsIgnoreCase("PKCS12" )) { //$NON-NLS-1$
 						System.setProperty("javax.net.ssl.keyStoreType", keyStoreType);//$NON-NLS-1$
+						x509SecurityStateIfc.setPKCS12on(true);
 						// get the passwd from console
 						//PokeInConsole.PASSWD.get();
 						try {
@@ -174,8 +261,18 @@ public class SecurityFileSnapshot {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
-							PublishPasswordUpdate.getInstance().subscribe(subscriber);
-							PkiPasswordGrabberWidget runner = PkiPasswordGrabberWidget.getInstance();
+							ActivateSecurity.getInstance().log("SecurityFileSnapshot Subscribe--------------------");
+							PublishPasswordUpdate publishPasswordUpdate = new PublishPasswordUpdate();
+							publishPasswordUpdate.subscribe(subscriber);
+							
+							SecurityComponent c = (SecurityComponent) SecurityComponent.getSecurityComponentIfc();
+//							c.setRunning(true);
+//							if ( c.isRunning()) {
+//								ActivateSecurity.getInstance().log("SecurityFileSnapshot RUNNING");
+//							}
+							
+							
+							PkiPasswordGrabberWidget runner = new PkiPasswordGrabberWidget();
 							Thread t1 = new Thread(runner);
 							t1.start();
 							
@@ -199,8 +296,9 @@ public class SecurityFileSnapshot {
 					properties.save(os, null);
 					// After saving encrypted passwd to properties file, switch to unencrypted
 					properties.setProperty("javax.net.ssl.keyStorePassword", passwd); //$NON-NLS-1$
-					SecurityOpRequest.getInstance().setConnected(true);
-					PublishPasswordUpdate.getInstance().publishMessage(passwd);
+					
+					securityOpRequest.setConnected(true);
+					PublishPasswordUpdate.publishMessage(passwd);
 				} else {
 					String ePasswd = passwdContainer.get();
 					passwd = NormalizeGCM.getInstance().decrypt(ePasswd, password, salt);
@@ -209,6 +307,8 @@ public class SecurityFileSnapshot {
 					properties.setProperty("javax.net.ssl.decryptedPassword", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				}
+				ActivateSecurity.getInstance().log("SecurityFileSnapshot preoperty keyStoreType:"+System.getProperty("javax.net.ssl.keyStoreType"));
+				ActivateSecurity.getInstance().log("SecurityFileSnapshot telling publisher to publish-------");
 				subscriber.publishedIncoming();
 			}
 			
@@ -216,11 +316,12 @@ public class SecurityFileSnapshot {
 
 			System.getProperties().putAll(properties);
 
-			lock.release();
-			ActivateSecurity.getInstance().log("Loaded PKI System Properties");// $NON-NLS-1$
+			//lock.release();
+			ActivateSecurity.getInstance().log("SecurityFileSnapshot Loaded PKI System Properties");// $NON-NLS-1$
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		ActivateSecurity.getInstance().log("SecurityFileSnapshot loaded PKI properties--------------------");
 		return properties;
 	}
 
@@ -306,5 +407,15 @@ public class SecurityFileSnapshot {
 			e.printStackTrace();
 		}
 		return a;
+	}
+
+	@Override
+	public void setValidConnection(boolean b) {
+		securityConnection=b;
+	}
+
+	@Override
+	public boolean getValidConnection() {
+		return securityConnection;
 	}
 }

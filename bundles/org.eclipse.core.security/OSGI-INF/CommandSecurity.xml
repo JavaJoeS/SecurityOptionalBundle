@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.eclipse.core.security.CommandSecurity" immediate="true" activate="activate">
+  <property name="osgi.command.scope" type="String" value="security"/>
+  <property name="osgi.command.function">letsGo</property>
+  <service>
+    <provide interface="org.eclipse.core.security.CommandSecurity"/>
+  </service>
+  <reference name="Startup" interface="org.eclipse.core.security.SecurityComponentIfc" bind="setStartup"/>
+  <reference name="securityComponentIfc" interface="org.eclipse.core.security.SecurityComponentIfc" bind="setReference"/>
+  <implementation class="org.eclipse.core.security.CommandSecurity"/>
+</scr:component>

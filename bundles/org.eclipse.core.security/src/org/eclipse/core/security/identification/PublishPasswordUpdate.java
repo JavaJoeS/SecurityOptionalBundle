@@ -15,28 +15,25 @@
 package org.eclipse.core.security.identification;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.concurrent.Flow.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 
-import org.eclipse.core.security.ActivateSecurity;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-@Component(immediate = true)
+import org.osgi.service.component.annotations.ServiceScope;
+/*
+ *  This component will publish message to each subscriber registered
+ */
+
+@Component(scope=ServiceScope.SINGLETON)
 public class PublishPasswordUpdate implements PublishPasswordUpdateIfc {
-	private static PublishPasswordUpdate INSTANCE;
-	private final ExecutorService executor = Executors.newFixedThreadPool(10);
-	private List<Subscriber<? super String>> subscribers = new ArrayList<>();
+	
+	private static final ExecutorService executor = Executors.newFixedThreadPool(10);
+	private static List<Subscriber<? super String>> subscribers = new ArrayList<>();
 
-	private PublishPasswordUpdate() {
-	}
-
-	public static PublishPasswordUpdate getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new PublishPasswordUpdate();
-		}
-		return INSTANCE;
+	public PublishPasswordUpdate() {
 	}
 
 	public void subscribe(Subscriber subscriber) {
@@ -47,7 +44,7 @@ public class PublishPasswordUpdate implements PublishPasswordUpdateIfc {
 		return subscribers.size();
 	}
 
-	public void publishMessage(String message) {
+	public static  void publishMessage(String message) {
 		subscribers.forEach(subscriber -> {
 			executor.submit(() -> {
 				subscriber.onNext(message);
@@ -60,16 +57,4 @@ public class PublishPasswordUpdate implements PublishPasswordUpdateIfc {
 		executor.shutdown();
 	}
 
-	@Reference
-	void bindSubscriberService(PublishPasswordUpdateIfc updateService) {
-		// Call the service and print out result!
-		//System.out.println("Current time on remote is: " + updateService.close());
-		System.out.println("SUBSCRIBER COUNT:"+updateService.getSubscriberCount());
-		ActivateSecurity.getInstance().log("PublishPasswordUpdate bindSubscriberService");
-	}
-
-	// Called by DS upon ITimeService undiscovery
-	void unbindSubscriberService(PublishPasswordUpdateIfc updateService) {
-		System.out.println("Undiscovered ITimeService via DS.  Instance=" + updateService);
-	}
 }

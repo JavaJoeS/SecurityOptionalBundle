@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.core.security.managers;
 
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.InvalidParameterException;
@@ -33,15 +32,24 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Reference;
+
 import org.eclipse.core.security.ActivateSecurity;
 import org.eclipse.core.security.util.EclipseKeyStoreCollection;
 
+/*
+ *  Keysztore initialization for PKCS11 product
+ */
 
+@Component(scope=ServiceScope.SINGLETON)
 public class AuthenticationBase implements AuthenticationService {
 	
-	private static AuthenticationBase INSTANCE;
 	protected SSLContext sslContext;
 	protected String pin;
+	@Reference KeyStoreManager keyStoreManager;
+	@Reference ConfigureTrust configureTrust;
 	static KeyStore.PasswordProtection pp = new KeyStore.PasswordProtection("".toCharArray()); //$NON-NLS-1$
 	protected boolean is9;
 	protected String pkiProvider = "SunPKCS11"; // or could be FIPS provider :SunPKCS11-FIPS //$NON-NLS-1$
@@ -50,12 +58,6 @@ public class AuthenticationBase implements AuthenticationService {
 	protected String fingerprint;
 	KeyStore keyStore = null;
 	private AuthenticationBase() {}
-	public static AuthenticationBase getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new AuthenticationBase();
-		}
-		return INSTANCE;
-	}
 	
 	@Override
 	public KeyStore initialize(char[] p) {
@@ -83,7 +85,7 @@ public class AuthenticationBase implements AuthenticationService {
 				   
 				    lp.setEventHandler(pkiCB);
 					keyStore.load(lp);
-					sslContext=AuthenticationBase.INSTANCE.setSSLContext(keyStore);
+					sslContext=setSSLContext(keyStore);
 					ActivateSecurity.getInstance().log("SSL context PROTOCOL:"+sslContext.getProtocol()); //$NON-NLS-1$
 				}
 
@@ -187,13 +189,13 @@ public class AuthenticationBase implements AuthenticationService {
 		try {
 			sslContext = SSLContext.getInstance("TLSv1.3"); //$NON-NLS-1$
 			
-			Optional<X509TrustManager> PKIXtrust = ConfigureTrust.getInstance().setUp();
+			Optional<X509TrustManager> PKIXtrust = configureTrust.setUp();
 			if (PKIXtrust.isEmpty()) {
 				ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
 			} else {
 				
-				KeyManager[] km = new KeyManager[] { KeyStoreManager.getInstance() };
-				TrustManager[] tm = new TrustManager[] { ConfigureTrust.getInstance() };
+				KeyManager[] km = new KeyManager[] { keyStoreManager };
+				TrustManager[] tm = new TrustManager[] { configureTrust };
 				
 				sslContext.init(km, tm, new SecureRandom());
 				SSLContext.setDefault(sslContext);
@@ -221,8 +223,8 @@ public class AuthenticationBase implements AuthenticationService {
 		return fingerprint;
 	}
 
-	public static void setFingerprint(String fingerprint) {
-		AuthenticationBase.INSTANCE.fingerprint = fingerprint;
+	public void setFingerprint(String fingerprint) {
+		this.fingerprint = fingerprint;
 	}
 
 	public KeyManager getCustomKeyManager(KeyStore keyStore) {

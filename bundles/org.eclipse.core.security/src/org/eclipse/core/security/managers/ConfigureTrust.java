@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.core.security.managers;
 
-import java.io.FileInputStream;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,24 +26,23 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
-
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.eclipse.core.security.ActivateSecurity;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.ServiceScope;
+
+@Component(scope=ServiceScope.SINGLETON)
 public class ConfigureTrust implements X509TrustManager {
 	
-	private static ConfigureTrust INSTANCE;
 	protected X509TrustManager pkixTrustManager = null;
-	private ConfigureTrust() {}
-	public static ConfigureTrust getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new ConfigureTrust();
-		}
-		return INSTANCE;
-	}
+	public ConfigureTrust() {}
+	
 
 	public Optional<X509TrustManager> setUp() {
 		KeyStore keyStore = null;

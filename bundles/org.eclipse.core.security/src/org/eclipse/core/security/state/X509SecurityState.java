@@ -13,35 +13,43 @@
  *******************************************************************************/
 package org.eclipse.core.security.state;
 
-public class X509SecurityState {
-	private static X509SecurityState INSTANCE;
-	private boolean isPKCS11on=false;
-	private boolean isPKCS12on=false;
-	private boolean isTrustOn=false;
-	private X509SecurityState() {}
-	public static X509SecurityState getInstance() {
-        if(INSTANCE == null) {
-            INSTANCE = new X509SecurityState();
-        }
-        return INSTANCE;
-    }
+import org.osgi.service.component.annotations.Component;
+import org.eclipse.core.security.ActivateSecurity;
+import org.osgi.service.component.annotations.ServiceScope;
+
+/*
+ * This component keeps the state of PKCS
+ */
+
+@Component(scope=ServiceScope.SINGLETON, service=X509SecurityStateIfc.class)
+public class X509SecurityState implements X509SecurityStateIfc {
+	
+	private static boolean isPKCS11on=false;
+	private static boolean isPKCS12on=false;
+	private static boolean isTrustOn=false;
+	public X509SecurityState() {
+		ActivateSecurity.getInstance().log("X509SecurityState CONSTRUCTOR"); //$NON-NLS-1$
+	}
 	
 	public boolean isPKCS11on() {
 		return isPKCS11on;
 	}
-	public void setPKCS11on(boolean isPKCS11on) {
-		this.isPKCS11on = isPKCS11on;
+	public void setPKCS11on(boolean state) {
+		ActivateSecurity.getInstance().log("X509SecurityState setPKCS11on:"+state); //$NON-NLS-1$
+		this.isPKCS11on = state;
 	}
 	public boolean isPKCS12on() {
+		ActivateSecurity.getInstance().log("X509SecurityState isPKCS12on:"+isPKCS12on); //$NON-NLS-1$
 		return isPKCS12on;
 	}
-	public void setPKCS12on(boolean isPKCS12on) {
-		this.isPKCS12on = isPKCS12on;
+	public void setPKCS12on(boolean state) {
+		ActivateSecurity.getInstance().log("X509SecurityState setPKCS12on:"+state); //$NON-NLS-1$
+		this.isPKCS12on = state;
 	}
 	public boolean isTrustOn() {
 		return isTrustOn;
 	}
-	public void setTrustOn(boolean isTrustOn) {
-		this.isTrustOn = isTrustOn;
+	public void setTrustOn(boolean state) {
+		this.isTrustOn = state;
 	}
 }

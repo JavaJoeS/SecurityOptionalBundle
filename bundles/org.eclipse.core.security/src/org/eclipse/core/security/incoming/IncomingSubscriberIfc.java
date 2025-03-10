@@ -11,22 +11,21 @@
  * Contributors:
  *     Eclipse Platform - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.security.encryption;
+package org.eclipse.core.security.incoming;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
 
-@Component(scope=ServiceScope.SINGLETON)
-public class SecurityOpRequest {
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
+
+/*
+ *  interface to use for Publish paradigm in Pub/Sub 
+ */
+
+public interface IncomingSubscriberIfc extends Subscriber {
 	
-	public SecurityOpRequest() {}
-	
-	public boolean isConnected=false;
-	
-	public boolean getConnected() {
-		return isConnected;	
-	}
-	public void setConnected(boolean b) {
-		isConnected=b;	
-	}
+	public void onSubscribe(Subscription subscription);
+	public void onNext(Object item);
+	public void publishedIncoming();
+	public void onError(Throwable throwable);
+	public void onComplete();
 }

@@ -64,9 +64,5 @@ class ActivateSecurityTest {
 	void testLog() {
 		activateSecurityMock.getInstance().log("In Test Mode.");
 	}
-	@Test
-	void testActivateSubscriber() {
-		activateSecurityMock.getInstance().completeSecureContext();
-	}
 
 }

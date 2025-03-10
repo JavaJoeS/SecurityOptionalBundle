@@ -11,22 +11,18 @@
  * Contributors:
  *     Eclipse Platform - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.security.encryption;
+package org.eclipse.core.security.state;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
+/*
+ * This interface keeps the state of PKCS
+ */
 
-@Component(scope=ServiceScope.SINGLETON)
-public class SecurityOpRequest {
-	
-	public SecurityOpRequest() {}
-	
-	public boolean isConnected=false;
-	
-	public boolean getConnected() {
-		return isConnected;	
-	}
-	public void setConnected(boolean b) {
-		isConnected=b;	
-	}
+public interface X509SecurityStateIfc {
+		
+	public boolean isPKCS11on();	
+	public void setPKCS11on(boolean state);
+	public boolean isPKCS12on();
+	public void setPKCS12on(boolean state);
+	public boolean isTrustOn();
+	public void setTrustOn(boolean state);
 }

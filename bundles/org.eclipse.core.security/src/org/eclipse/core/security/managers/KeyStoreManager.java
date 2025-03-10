@@ -40,24 +40,35 @@ import java.util.Hashtable;
 import javax.net.ssl.X509KeyManager;
 
 import org.eclipse.core.security.ActivateSecurity;
+import org.eclipse.core.security.SecurityComponent;
 import org.eclipse.core.security.identification.FingerprintX509;
 import org.eclipse.core.security.util.KeyStoreFormat;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.framework.FrameworkUtil;
+/*
+ *  Manage custom keystores provided by user
+ */
+
+@Component(scope=ServiceScope.SINGLETON)
 public class KeyStoreManager implements X509KeyManager {
-	private static KeyStoreManager INSTANCE;
+	
 	protected final int KEY_ENCIPHERMENT = 2;
 	protected final int DIGITAL_SIGNATURE = 0;
 	protected boolean isKeyStoreInitialized = false;
 	protected String selectedFingerprint = "NOSET"; //$NON-NLS-1$
 	protected KeyStore keyStore = null;
-	private KeyStoreManager() {}
-	public static KeyStoreManager getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new KeyStoreManager();
-		}
-		return INSTANCE;
+	@Reference FingerprintX509 fingerprintX509;
+	
+	@Activate
+	void activate() {
+		ActivateSecurity.getInstance().log("KeyStoreManager activate"); //$NON-NLS-1$
+		FrameworkUtil.getBundle(SecurityComponent.class).getBundleContext();
 	}
-
+	
 	public KeyStore getKeyStore(String fileLocation, String password, KeyStoreFormat format) {
 		InputStream in = null;
 		try {

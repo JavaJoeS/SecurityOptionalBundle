@@ -14,6 +14,7 @@
 package org.eclipse.core.security.identification;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -23,26 +24,34 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.SwingConstants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.ComponentContext;
 
 import org.eclipse.core.security.managers.KeyStoreManager;
 import org.eclipse.core.security.util.KeyStoreFormat;
 
-
+@Component(scope=ServiceScope.SINGLETON)
 public class PkiPasswordGrabberWidget implements Runnable {
 	JFrame frame = null;
 	Icon icon = null;
-	private static PkiPasswordGrabberWidget INSTANCE;
 	JPasswordField pword = null;
-	private PkiPasswordGrabberWidget() {}
-	public static PkiPasswordGrabberWidget getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new PkiPasswordGrabberWidget();
+	@Reference KeyStoreManager keyStoreManager;
+	public PkiPasswordGrabberWidget() {}
+	
+	@Activate
+	void activate() {
+		if ( keyStoreManager == null ) {
+			keyStoreManager=new KeyStoreManager();
 		}
-		return INSTANCE;
 	}
+	
 	@Override
 	public void run() {
 		try {
+			TimeUnit.SECONDS.sleep(10);
 			String pw = getInput();
 			System.setProperty("javax.net.ssl.keyStorePassword", pw);
 		} catch(Exception e) {
@@ -88,18 +97,19 @@ public class PkiPasswordGrabberWidget implements Runnable {
 				password = pword.getPassword();
 				pw=new String(password);
 				System.setProperty("javax.net.ssl.keyStorePassword", pw); //$NON-NLS-1$
+				
 
 				keystoreContainer = Optional
-						.ofNullable(KeyStoreManager.getInstance().getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
+						.ofNullable(keyStoreManager.getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
 								System.getProperty("javax.net.ssl.keyStorePassword"), //$NON-NLS-1$
 								KeyStoreFormat.valueOf(System.getProperty("javax.net.ssl.keyStoreType")))); //$NON-NLS-1$
-				if ((keystoreContainer.isEmpty()) || (!(KeyStoreManager.getInstance().isKeyStoreInitialized()))) {
+				if ((keystoreContainer.isEmpty()) || (!(keyStoreManager.isKeyStoreInitialized()))) {
 					JOptionPane.showMessageDialog(null,"Incorrect Password",null,
 	                        JOptionPane.ERROR_MESSAGE);//$NON-NLS-1$
 					System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
 					pword.setText("");//$NON-NLS-1$
 				} else {
-					PublishPasswordUpdate.getInstance().publishMessage(pw);
+					PublishPasswordUpdate.publishMessage(pw);
 					break;
 				}
 			} else {

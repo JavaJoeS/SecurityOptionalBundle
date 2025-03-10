@@ -15,31 +15,89 @@ package org.eclipse.core.security.incoming;
 
 import java.security.KeyStore;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.security.ActivateSecurity;
-import org.eclipse.core.security.managers.AuthenticationBase;
-import org.eclipse.core.security.managers.KeyStoreManager;
-import org.eclipse.core.security.managers.KeystoreSetup;
-import org.eclipse.core.security.state.X509SecurityState;
+import org.eclipse.core.security.CommandSecurity;
 
+import org.eclipse.core.security.state.X509SecurityStateIfc;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.ServiceReference;
+
+/*
+ *  This Singleton is the Controller for the Client or Server Authentication process,
+ *  exits when no configuration exists.
+ */
+
+@Component(scope=ServiceScope.SINGLETON)
 public class InBoundController {
-	private static InBoundController INSTANCE;
+	private static AtomicInteger instanceCounter = new AtomicInteger();
+	private static AtomicBoolean activated = new AtomicBoolean();
+	private int instanceNo=0;
 	protected final String pin = "#Gone2Boat@Bay"; //$NON-NLS-1$
 	Optional<KeyStore> keystoreContainer = null;//$NON-NLS-1$
+	//@Reference SecurityFileSnapshot securityFileSnapshot;
+	@Reference X509SecurityStateIfc x509SecurityStateIfc;
+	@Reference IncomingSystemPropertyIfc incomingProperty;
+	private CommandSecurity commandSecurity;
+	
 	protected static KeyStore keyStore = null;//$NON-NLS-1$
-	private InBoundController() {
+	BundleContext bundleContext=null;
+	
+	public InBoundController() {
+		ActivateSecurity.getInstance().log("InBoundController CONTRUCTOR:"); //$NON-NLS-1$
+		instanceNo = instanceCounter.incrementAndGet();
 	}
-
-	public static InBoundController getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new InBoundController();
+	
+	@Activate
+	void activate(ComponentContext ctx) {
+		try {
+			ActivateSecurity.getInstance().log("InBoundController Activate is:."+activated); //$NON-NLS-1$
+			if ( activated.get() ) {
+				return;
+			} else {
+				activated.set(true);
+			}
+			
+			ActivateSecurity.getInstance().log("InBoundController Activate INSTANCE:."+instanceNo); //$NON-NLS-1$
+			if ( ctx != null ) {
+				bundleContext = ctx.getBundleContext();
+				ServiceReference ref = bundleContext.getServiceReference(CommandSecurity.class.getName());
+				commandSecurity = (CommandSecurity) bundleContext.getService(ref);
+				commandSecurity.letsGo();
+				commandSecurity.Run();
+			}
+			
+			if ( x509SecurityStateIfc != null ) {
+				x509SecurityStateIfc.setPKCS11on(false);
+				x509SecurityStateIfc.setPKCS12on(false);
+				x509SecurityStateIfc.setTrustOn(false);
+				controller();
+			}
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return INSTANCE;
 	}
 
 	public void controller() {
 		Optional<String> keystoreTypeContainer = null;
 		Optional<String> decryptedPw;
+		
+		//state.setPKCS11on(false);
+		//state.setPKCS12on(false);
+		
+		//ActivateSecurity.getInstance().log("InBoundController controller."); //$NON-NLS-1$
+		
+		
 		/*
 		 * First see if parameters were passed into eclipse via the command line -D
 		 */
@@ -54,12 +112,13 @@ public class InBoundController {
 			}
 		}
 		if (keystoreTypeContainer.isEmpty()) {
+			ActivateSecurity.getInstance().log("InBoundController controller NO KEYSTORE TYPE."); //$NON-NLS-1$
 			//
 			// Incoming parameter as -DkeystoreType was empty so CHECK in .pki file
 			//
-			
-			if (PublicKeySecurity.getInstance().isTurnedOn()) {
-				PublicKeySecurity.getInstance().getPkiPropertyFile(pin);
+			//if (publicKeySecurity.getInstance().isTurnedOn()) {
+			if (true) {
+				//publicKeySecurity.getInstance().getPkiPropertyFile(pin);
 			}
 		}
 	}

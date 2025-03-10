@@ -11,22 +11,12 @@
  * Contributors:
  *     Eclipse Platform - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.security.encryption;
+package org.eclipse.core.security.incoming;
 
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
-
-@Component(scope=ServiceScope.SINGLETON)
-public class SecurityOpRequest {
-	
-	public SecurityOpRequest() {}
-	
-	public boolean isConnected=false;
-	
-	public boolean getConnected() {
-		return isConnected;	
-	}
-	public void setConnected(boolean b) {
-		isConnected=b;	
-	}
+public interface IncomingSystemPropertyIfc {
+		
+	public boolean checkType();
+	public boolean checkKeyStore(String pin);
+	public boolean checkTrustStoreType();
+	public boolean checkTrustStore();
 }
