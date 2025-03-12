@@ -75,6 +75,7 @@ public class KeystoreSetup {
 	
 	public KeystoreSetup() {
 		ActivateSecurity.getInstance().log("KeystoreSetup CONTRUCTOR."); //$NON-NLS-1$	
+		
 	}
 	
 	@Activate
@@ -139,6 +140,10 @@ public class KeystoreSetup {
 		if ( configureTrust == null ) {
 			configureTrust = new ConfigureTrust();
 		}
+		Optional op = Optional.ofNullable(System.getProperty("core.state"));
+		if (!(op.isEmpty())) {
+			ActivateSecurity.getInstance().log("KeystoreSetup setPkiContext STATE:."+op.get()); //$NON-NLS-1$
+		}
 		
 		if (incomingSystemPropertyIfc.checkTrustStoreType()) {
 			ActivateSecurity.getInstance().log("Activating TrustManager Initialization."); //$NON-NLS-1$
@@ -175,6 +180,11 @@ public class KeystoreSetup {
 	}
 	public void activateSecureContext( KeyManager[] km, TrustManager[] tm ) {
 		try {
+			Optional op = Optional.ofNullable(System.getProperty("core.state"));
+			if (!(op.isEmpty())) {
+				ActivateSecurity.getInstance().log("KeystoreSetup activateSecureContext  STATE:."+op.get()); //$NON-NLS-1$
+			}
+			
 			ActivateSecurity.getInstance().log("KeyStoreSetup processing activateSecureContext"); //$NON-NLS-1$
 			SSLContext ctx = SSLContext.getInstance("TLS");//$NON-NLS-1$
 			ctx.init(km, tm, null);
@@ -189,6 +199,8 @@ public class KeystoreSetup {
 			ActivateSecurity.getInstance().log("SSLContext has been configured with SSLContext default."); //$NON-NLS-1$
 			System.setProperty("javax.net.ssl.keyStoreProvider", "PKCS12");
 			ActivateSecurity.getInstance().log("SSLContext PRovider has been set."); //$NON-NLS-1$
+			
+			System.out.println("KeystoreSetup SSLContext has been CONFIGURED");
 			
 		} catch (KeyManagementException e) {
 			e.printStackTrace();	

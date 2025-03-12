@@ -27,7 +27,6 @@ import org.osgi.service.component.annotations.ServiceScope;
  *  This component will publish message to each subscriber registered
  */
 
-@Component(scope=ServiceScope.SINGLETON)
 public class PublishPasswordUpdate implements PublishPasswordUpdateIfc {
 	
 	private static final ExecutorService executor = Executors.newFixedThreadPool(10);
@@ -50,6 +49,7 @@ public class PublishPasswordUpdate implements PublishPasswordUpdateIfc {
 				subscriber.onNext(message);
 			});
 		});
+		
 	}
 
 	public void close() {

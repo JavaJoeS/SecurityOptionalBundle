@@ -29,6 +29,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
@@ -339,15 +340,33 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 							ActivateSecurity.getInstance().log("SecurityFileSnapshot Subscribe--------------------");
 							PublishPasswordUpdate publishPasswordUpdate = new PublishPasswordUpdate();
 							publishPasswordUpdate.subscribe(subscriber);
-							
-							
 							PkiPasswordGrabberWidget runner = new PkiPasswordGrabberWidget();
 							
 							ExecutorService es = Executors.newSingleThreadExecutor();
-							Future future = es.submit(runner);
+							List<Future<String>> list = new ArrayList<Future<String>>();
 							
-							ActivateSecurity.getInstance().log("SecurityFileSnapshot PW RETURNED:"+future.get());
-							es.shutdownNow();
+							//Future<String>future=null;
+							try {
+								es.submit(() -> {
+										System.out.println(" executed by " + Thread.currentThread().getName());
+						                try {
+						                	final Future<String> future = (Future<String>) runner.call();
+						                } catch (InterruptedException ie) {
+						                    es.notifyAll();
+						                } catch (Exception e) {
+						                    es.shutdown();
+						                }finally {
+								            es.shutdownNow();
+								        }
+						            });
+								//list.add(future);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} 
+							
+							ActivateSecurity.getInstance().log("SecurityFileSnapshot PW RETURNED:");
+							
 							boolean finished = es.awaitTermination(20, TimeUnit.SECONDS);
 							
 							ActivateSecurity.getInstance().log("SecurityFileSnapshot Subscribe RETURNED ");

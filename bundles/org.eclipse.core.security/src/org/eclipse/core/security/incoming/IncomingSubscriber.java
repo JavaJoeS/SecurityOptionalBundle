@@ -34,7 +34,6 @@ import org.osgi.service.component.annotations.ServiceScope;
 /*
  *  Class to use for Publish paradigm in Pub/Sub 
  */
-
 @Component(scope=ServiceScope.SINGLETON)
 public class IncomingSubscriber implements  IncomingSubscriberIfc {
 	
