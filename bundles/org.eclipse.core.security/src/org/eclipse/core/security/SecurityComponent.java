@@ -42,8 +42,7 @@ public class SecurityComponent {
 		Optional stateContainer = Optional.ofNullable(System.getProperty("core.state"));
 		if ( stateContainer.isEmpty()) {
 			System.setProperty("core.state", "running");
-		} else {
-			
+		} else {		
 			ActivateSecurity.getInstance().log("SecurityComponent bindSecurityService. STATE:"+stateContainer.get());
 		}
 	}
@@ -52,13 +51,11 @@ public class SecurityComponent {
 	}
 
 	public static SecurityComponentIfc getSecurityComponentIfc() {
-		ActivateSecurity.getInstance().log("SecurityComponent getSecurityComponentIfc.");
 		return securityComponentIfc;
 	}
 	
 	@Activate
 	void checkstatusIsActive() {
-		ActivateSecurity.getInstance().log("SecurityComponent ACTIVATED.");
 		isEnabled=true;
 	}
 }
