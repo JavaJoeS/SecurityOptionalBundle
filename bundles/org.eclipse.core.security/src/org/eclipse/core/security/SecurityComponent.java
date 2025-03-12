@@ -14,6 +14,8 @@
 package org.eclipse.core.security;
 
 
+import java.util.Optional;
+
 import org.eclipse.core.security.incoming.SecurityFileSnapshot;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Modified;
@@ -37,10 +39,15 @@ public class SecurityComponent {
 		
 		ActivateSecurity.getInstance().log("SecurityComponent bindSecurityService.");
 		securityComponentIfc=securityComponentIfc;
+		Optional stateContainer = Optional.ofNullable(System.getProperty("core.state"));
+		if ( stateContainer.isEmpty()) {
+			System.setProperty("core.state", "running");
+		} else {
+			
+			ActivateSecurity.getInstance().log("SecurityComponent bindSecurityService. STATE:"+stateContainer.get());
+		}
 	}
 	void unbindSecurityService(SecurityComponentIfc securityComponentIfc) {
-		
-		ActivateSecurity.getInstance().log("SecurityComponent unbindSecurityService.");
 		securityComponentIfc=null;
 	}
 
@@ -53,9 +60,5 @@ public class SecurityComponent {
 	void checkstatusIsActive() {
 		ActivateSecurity.getInstance().log("SecurityComponent ACTIVATED.");
 		isEnabled=true;
-	}
-	@Modified
-	void checkstatusIsModified() {
-		System.out.println("SecurityComponent MODIFIED");
 	}
 }

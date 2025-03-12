@@ -14,6 +14,7 @@
 package org.eclipse.core.security.identification;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.Icon;
@@ -31,33 +32,45 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.ComponentContext;
 import org.eclipse.core.security.ActivateSecurity;
 import org.eclipse.core.security.managers.KeyStoreManager;
-import org.eclipse.core.security.util.KeyStoreFormat;
 
-@Component(scope=ServiceScope.SINGLETON)
-public class PkiPasswordGrabberWidget implements Runnable {
+
+public class PkiPasswordGrabberWidget implements Callable {
 	JFrame frame = null;
 	Icon icon = null;
 	JPasswordField pword = null;
-	@Reference KeyStoreManager keyStoreManager;
+	//@Reference KeyStoreManager keyStoreManager;
+	KeyStoreManager keyStoreManager;
+	PublishPasswordUpdate publishPasswordUpdate;
 	public PkiPasswordGrabberWidget() {}
 	
-	@Activate
-	void activate() {
+//	@Activate
+//	void activate() {
+//		if ( keyStoreManager == null ) {
+//			keyStoreManager=new KeyStoreManager();
+//		}
+//	}
+	@Override
+	public Object call() throws Exception {
+		
 		if ( keyStoreManager == null ) {
 			keyStoreManager=new KeyStoreManager();
 		}
+		publishPasswordUpdate = new PublishPasswordUpdate();
+		TimeUnit.SECONDS.sleep(2);
+		String pw = getInput();
+		System.setProperty("javax.net.ssl.keyStorePassword", pw);
+		return pw;
 	}
-	
-	@Override
-	public void run() {
-		try {
-			TimeUnit.SECONDS.sleep(10);
-			String pw = getInput();
-			System.setProperty("javax.net.ssl.keyStorePassword", pw);
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
+//	@Override
+//	public void run() {
+//		try {
+//			TimeUnit.SECONDS.sleep(2);
+//			String pw = getInput();
+//			System.setProperty("javax.net.ssl.keyStorePassword", pw);
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 	public String getInput() {
 
 		Optional keystoreContainer = null;		
@@ -106,7 +119,7 @@ public class PkiPasswordGrabberWidget implements Runnable {
 				keystoreContainer = Optional
 						.ofNullable(keyStoreManager.getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
 								System.getProperty("javax.net.ssl.keyStorePassword"), //$NON-NLS-1$
-								KeyStoreFormat.valueOf(System.getProperty("javax.net.ssl.keyStoreType")))); //$NON-NLS-1$
+								System.getProperty("javax.net.ssl.keyStoreType"))); //$NON-NLS-1$
 				if ((keystoreContainer.isEmpty()) || (!(keyStoreManager.isKeyStoreInitialized()))) {
 					JOptionPane.showMessageDialog(null,"Incorrect Password",null,
 	                        JOptionPane.ERROR_MESSAGE);//$NON-NLS-1$
@@ -117,9 +130,9 @@ public class PkiPasswordGrabberWidget implements Runnable {
 					pword.setText("");//$NON-NLS-1$
 					
 				} else {
-					ActivateSecurity.getInstance().log("PkiPasswordGrabberWidget KEYSTORE FOUND");
+					//ActivateSecurity.getInstance().log("PkiPasswordGrabberWidget KEYSTORE FOUND");
 					
-					PublishPasswordUpdate.publishMessage(pw);
+					publishPasswordUpdate.publishMessage(pw);
 					
 					break;
 				}
@@ -128,5 +141,5 @@ public class PkiPasswordGrabberWidget implements Runnable {
 			}
 		}
 		return pw;
-	}
+	}	
 }

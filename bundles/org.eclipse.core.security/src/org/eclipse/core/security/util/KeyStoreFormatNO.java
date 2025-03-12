@@ -13,7 +13,8 @@
  *******************************************************************************/
 package org.eclipse.core.security.util;
 
-public enum KeyStoreFormat
+
+public enum KeyStoreFormatNO
 {
 	JKS("JKS"), //$NON-NLS-1$
 	PKCS12("PKCS12"), //$NON-NLS-1$
@@ -21,7 +22,7 @@ public enum KeyStoreFormat
 
 	private String value;
 
-	KeyStoreFormat (String value)
+	KeyStoreFormatNO (String value)
 	{
 		this.value = value;
 	}

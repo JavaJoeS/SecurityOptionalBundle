@@ -35,6 +35,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,24 +48,30 @@ import org.eclipse.core.security.encryption.SecureGCM;
 import org.eclipse.core.security.encryption.SecurityOpRequest;
 import org.eclipse.core.security.identification.PkiPasswordGrabberWidget;
 import org.eclipse.core.security.identification.PublishPasswordUpdate;
+import org.eclipse.core.security.managers.KeyStoreManager;
 import org.eclipse.core.security.state.X509SecurityState;
 import org.eclipse.core.security.state.X509SecurityStateIfc;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Activate;
-
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 
 /*
  * This Singleton checks for the presence of a file in your .eclipse directory named .pki
  * and reads it in if its there, otherwise nothing.
  */
 
-//@Component(immediate=true,
-@Component(
-	service=SecurityComponentIfc.class, 
+@Component(immediate=true,
+//@Component(
+	service=SecurityComponentIfc.class,
+//	configurationPolicy=ConfigurationPolicy.REQUIRE,
+//	scope=ServiceScope.BUNDLE)
 	scope=ServiceScope.SINGLETON)
 public class SecurityFileSnapshot implements SecurityComponentIfc {
 	private static AtomicInteger instanceCounter = new AtomicInteger();
@@ -81,59 +88,115 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 	Properties originalProperties = new Properties();
 	public static final String DotEclipse = ".eclipse";
 	public static final String USER_HOME = System.getProperty("user.home"); //$NON-NLS-1$
+	
 	@Reference SecurityOpRequest securityOpRequest;
+	@Reference KeyStoreManager keyStoreManager;
 	@Reference X509SecurityStateIfc x509SecurityStateIfc;
 	@Reference IncomingSystemPropertyIfc incomingProperty;
 	@Reference IncomingSubscriber subscriber;
 	@Reference InBoundController inBoundController;
+	@Reference TemplateForPKIfile templateForPKIfile;
+	@Reference SecureGCM secureGCM;
+	@Reference NormalizeGCM	normalizeGCM;
 	
 	public SecurityFileSnapshot() {
-		ActivateSecurity.getInstance().log("SecurityFileSnapshot CONTRUCTOR."); //$NON-NLS-1$
-		instanceNo = instanceCounter.incrementAndGet(); 
-	}
-	
-	@Activate
-	void activate(BundleContext context) {
-		ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate INSTANCE#"+instanceNo); //$NON-NLS-1$
 		
+		instanceNo = instanceCounter.incrementAndGet();
+		ActivateSecurity.getInstance().log("SecurityFileSnapshot CONTRUCTOR COUNT:"+instanceNo); //$NON-NLS-1$
 		
-		try {
-			if ( context != null ) {
-				ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context"); //$NON-NLS-1$
-				//context.registerService(SecurityComponentIfc.class, this, null );
-				//ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context done"); //$NON-NLS-1$
+		Optional op = Optional.ofNullable(System.getProperty("core.state"));
+		if ( op.isEmpty()) {
+			ActivateSecurity.getInstance().log("SecurityFileSnapshot EMPTY OP"); 
+		} else {
+			ActivateSecurity.getInstance().log("SecurityFileSnapshot OP:"+op.get());
+			if (op.get().equals("running")) {
+				startup();
 			}
-			
-			
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		
 	}
+	
+//	@Activate
+//	public void activate(final ComponentContext context) {
+//		ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate INSTANCE#"+instanceNo); //$NON-NLS-1$
+//		
+//		
+//		try {
+//			if ( context != null ) {
+//				ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context"); //$NON-NLS-1$
+//				//context.registerService(SecurityComponentIfc.class, this, null );
+//				//ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context done"); //$NON-NLS-1$
+//			}	
+//			
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//	}
+//	@Modified
+//	public void modified(final ComponentContext context) {
+//		ActivateSecurity.getInstance().log("SecurityFileSnapshot modified INSTANCE#"+instanceNo); //$NON-NLS-1$
+//		
+//		
+//		try {
+//			if ( context != null ) {
+//				ActivateSecurity.getInstance().log("SecurityFileSnapshot modified context"); //$NON-NLS-1$
+//				//context.registerService(SecurityComponentIfc.class, this, null );
+//				//ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context done"); //$NON-NLS-1$
+//			}	
+//			
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//	}
+//	
+//	@Deactivate
+//	public void deactivate(final ComponentContext context) {
+//		ActivateSecurity.getInstance().log("SecurityFileSnapshot Dectivate INSTANCE#"+instanceNo); //$NON-NLS-1$
+//		
+//		
+//		try {
+//			if ( context != null ) {
+//				ActivateSecurity.getInstance().log("SecurityFileSnapshot Deactivate context"); //$NON-NLS-1$
+//				//context.registerService(SecurityComponentIfc.class, this, null );
+//				//ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context done"); //$NON-NLS-1$
+//			}	
+//			
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//	}
 	public boolean isRunning() {
 		ActivateSecurity.getInstance().log("SecurityFileSnapshot isrunning."); //$NON-NLS-1$
 		return isrunning;
 	}
 	public void startup() {
-		ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- startup isLOADED:"+loaded.get()); //$NON-NLS-1$
+		ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- startup"); //$NON-NLS-1$
 		
-		if (loaded.get()) {
-			return;
-		} else {
-			loaded.set(true);
-		}
-		
+		ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- startup  NOW LOADING:"); //$NON-NLS-1$
 		if ( x509SecurityStateIfc == null) {
 			x509SecurityStateIfc=new X509SecurityState();
 		}
-		
-		if ( image() ) {
-			salt = new String(System.getProperty("user.name") + pin).getBytes(); //$NON-NLS-1$
-			load(pin, new String(salt));
+		Optional op = Optional.ofNullable(System.getProperty("core.state"));
+		if ( op.isEmpty()) {
+			return;
 		} else {
-			ActivateSecurity.getInstance().log("SecurityFileSnapshot DEACTIVATEd."); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- LOAD"); //$NON-NLS-1$
+			if (!(op.get().equals("loaded"))) {
+				if ( image() ) {
+					System.setProperty("core.state", "inproccess");
+					salt = new String(System.getProperty("user.name") + pin).getBytes(); //$NON-NLS-1$
+					load(pin, new String(salt));
+					System.setProperty("core.state", "loaded");
+				} else {
+					ActivateSecurity.getInstance().log("SecurityFileSnapshot DEACTIVATEd."); //$NON-NLS-1$
+				}
+			} 
 		}
 	}
 
@@ -147,7 +210,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 				if (Files.exists(Paths.get(USER_HOME + FileSystems.getDefault().getSeparator() + DotEclipse
 						+ FileSystems.getDefault().getSeparator() + ".pki"))) {
 					
-					ActivateSecurity.getInstance().log("SecurityFileSnapshot loading");
+					ActivateSecurity.getInstance().log("SecurityFileSnapshot loading image");
 					userDotEclipseHome = Paths.get(USER_HOME + FileSystems.getDefault().getSeparator() + DotEclipse
 							+ FileSystems.getDefault().getSeparator() + ".pki");
 					
@@ -167,7 +230,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 					 * FileSystems.getDefault().getSeparator()+DotEclipse+
 					 * FileSystems.getDefault().getSeparator()+ ".pki"));
 					 */
-					TemplateForPKIfile.getInstance().setup();
+					templateForPKIfile.setup();
 					return false;
 				}
 			}
@@ -210,6 +273,12 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 		Properties properties = new Properties();
 		String passwd = null;
 		try {
+			if ( secureGCM == null ) {
+				secureGCM= new SecureGCM();
+			}
+			if ( normalizeGCM == null ) {
+				normalizeGCM= new NormalizeGCM();
+			}
 			
 			subscriber = new IncomingSubscriber();
 			FileChannel fileChannel = FileChannel.open(userDotEclipseHome, StandardOpenOption.READ);
@@ -264,25 +333,23 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
+							if ( keyStoreManager == null ) {
+								keyStoreManager= new KeyStoreManager();
+							}
 							ActivateSecurity.getInstance().log("SecurityFileSnapshot Subscribe--------------------");
 							PublishPasswordUpdate publishPasswordUpdate = new PublishPasswordUpdate();
 							publishPasswordUpdate.subscribe(subscriber);
 							
-//							SecurityComponent c = (SecurityComponent) SecurityComponent.getSecurityComponentIfc();
-//							c.setRunning(true);
-//							if ( c.isRunning()) {
-//								ActivateSecurity.getInstance().log("SecurityFileSnapshot RUNNING");
-//							}
-							
 							
 							PkiPasswordGrabberWidget runner = new PkiPasswordGrabberWidget();
-							//Thread t1 = new Thread(runner);
-							//t1.start();
 							
-							ExecutorService es = Executors.newCachedThreadPool();
-							es.execute(runner);
-							es.shutdown();
-							boolean finished = es.awaitTermination(1, TimeUnit.MINUTES);
+							ExecutorService es = Executors.newSingleThreadExecutor();
+							Future future = es.submit(runner);
+							
+							ActivateSecurity.getInstance().log("SecurityFileSnapshot PW RETURNED:"+future.get());
+							es.shutdownNow();
+							boolean finished = es.awaitTermination(20, TimeUnit.SECONDS);
+							
 							ActivateSecurity.getInstance().log("SecurityFileSnapshot Subscribe RETURNED ");
 							
 						} catch(Exception xe) {
@@ -300,7 +367,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 					properties.setProperty("javax.net.ssl.encryptedPassword", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 					passwd = passwdContainer.get();
 					properties.setProperty("javax.net.ssl.keyStorePassword", //$NON-NLS-1$
-					SecureGCM.getInstance().encrypt(passwd, password, salt));
+					secureGCM.encrypt(passwd, password, salt));
 					OutputStream os = Channels.newOutputStream(updateChannel);
 					properties.save(os, null);
 					// After saving encrypted passwd to properties file, switch to unencrypted
@@ -310,7 +377,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 					PublishPasswordUpdate.publishMessage(passwd);
 				} else {
 					String ePasswd = passwdContainer.get();
-					passwd = NormalizeGCM.getInstance().decrypt(ePasswd, password, salt);
+					passwd = normalizeGCM.decrypt(ePasswd, password, salt);
 					System.setProperty("javax.net.ssl.decryptedPassword", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 					properties.setProperty("javax.net.ssl.keyStorePassword", passwd); //$NON-NLS-1$
 					properties.setProperty("javax.net.ssl.decryptedPassword", "true"); //$NON-NLS-1$ //$NON-NLS-2$

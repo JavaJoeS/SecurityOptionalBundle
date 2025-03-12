@@ -42,7 +42,6 @@ import javax.net.ssl.X509KeyManager;
 import org.eclipse.core.security.ActivateSecurity;
 import org.eclipse.core.security.SecurityComponent;
 import org.eclipse.core.security.identification.FingerprintX509;
-import org.eclipse.core.security.util.KeyStoreFormat;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
@@ -69,7 +68,7 @@ public class KeyStoreManager implements X509KeyManager {
 		//FrameworkUtil.getBundle(SecurityComponent.class).getBundleContext();
 	}
 	
-	public KeyStore getKeyStore(String fileLocation, String password, KeyStoreFormat format) {
+	public KeyStore getKeyStore(String fileLocation, String password, String format) {
 		InputStream in = null;
 		try {
 
@@ -77,7 +76,7 @@ public class KeyStoreManager implements X509KeyManager {
 				Path p = Paths.get(fileLocation);
 				in = Files.newInputStream(p);
 
-				keyStore = KeyStore.getInstance(format.getValue());
+				keyStore = KeyStore.getInstance(format.trim());
 				keyStore.load(in, password.toCharArray());
 
 				setKeyStoreInitialized(true);
@@ -115,10 +114,10 @@ public class KeyStoreManager implements X509KeyManager {
 	 * @throws IOException
 	 */
 
-	public KeyStore getKeyStore(InputStream in, String password, KeyStoreFormat format)
+	public KeyStore getKeyStore(InputStream in, String password, String format)
 	throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
-		keyStore = KeyStore.getInstance(format.getValue());
+		keyStore = KeyStore.getInstance(format.trim());
 		char pwd[] = null;
 		if(password != null)
 			pwd = password.toCharArray();
@@ -128,7 +127,7 @@ public class KeyStoreManager implements X509KeyManager {
 
 	}
 
-	public KeyStore getKeyStore(KeyStoreFormat format)
+	public KeyStore getKeyStore(String format)
 			throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, NoSuchProviderException {
 
 		String pin = ""; //$NON-NLS-1$

@@ -30,6 +30,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 @Component(scope=ServiceScope.SINGLETON)
 public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 	@Reference X509SecurityStateIfc x509SecurityStateIfc;
+	@Reference NormalizeGCM normalizeGCM;
 	public IncomingSystemProperty() {}
 	
 	@Activate
@@ -57,6 +58,9 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 		ActivateSecurity.getInstance().log("IncomingSystemProperty PROPERTY KEYstoreType:"+System.getProperty("javax.net.ssl.keyStoreType"));//$NON-NLS-1$
 		if ( x509SecurityStateIfc == null ) {
 			x509SecurityStateIfc = new X509SecurityState();
+		}
+		if ( normalizeGCM == null ) {
+			normalizeGCM=new NormalizeGCM();
 		}
 		
 		type = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
@@ -92,6 +96,9 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 		if ( x509SecurityStateIfc == null ) {
 			x509SecurityStateIfc = new X509SecurityState();
 		}
+		if ( normalizeGCM == null ) {
+			normalizeGCM=new NormalizeGCM();
+		}
 		
 		keyStore = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStore")); //$NON-NLS-1$
 		if (keyStore.isEmpty()) {
@@ -112,7 +119,7 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 			} else {
 				if (PasswordEncrypted.get().toString().equalsIgnoreCase("true")) { //$NON-NLS-1$
 					salt = new String(System.getProperty("user.name") + pin).getBytes(); //$NON-NLS-1$
-					String passwd = NormalizeGCM.getInstance().decrypt(keyStorePassword.get().toString(), pin,
+					String passwd = normalizeGCM.decrypt(keyStorePassword.get().toString(), pin,
 							new String(salt));
 					System.setProperty("javax.net.ssl.keyStorePassword", passwd); //$NON-NLS-1$
 				}

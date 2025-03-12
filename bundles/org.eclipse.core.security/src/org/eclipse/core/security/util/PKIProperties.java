@@ -38,7 +38,7 @@ public class PKIProperties extends Authenticator {
 	
 	@Activate
 	void activate(ComponentContext componentContext) {
-		load();
+		
 	}
 	
 	@Override

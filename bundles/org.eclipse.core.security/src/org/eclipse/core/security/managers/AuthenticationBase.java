@@ -50,6 +50,7 @@ public class AuthenticationBase implements AuthenticationService {
 	protected String pin;
 	@Reference KeyStoreManager keyStoreManager;
 	@Reference ConfigureTrust configureTrust;
+	@Reference EclipseKeyStoreCollection eclipseKeyStoreCollection;
 	static KeyStore.PasswordProtection pp = new KeyStore.PasswordProtection("".toCharArray()); //$NON-NLS-1$
 	protected boolean is9;
 	protected String pkiProvider = "SunPKCS11"; // or could be FIPS provider :SunPKCS11-FIPS //$NON-NLS-1$
@@ -57,7 +58,8 @@ public class AuthenticationBase implements AuthenticationService {
 	protected String cfgDirectory = null;
 	protected String fingerprint;
 	KeyStore keyStore = null;
-	private AuthenticationBase() {}
+	
+	public AuthenticationBase() {}
 	
 	@Override
 	public KeyStore initialize(char[] p) {
@@ -238,7 +240,10 @@ public class AuthenticationBase implements AuthenticationService {
 		return keyManager;
 	}
 	public ArrayList getList() {
-		return EclipseKeyStoreCollection.getInstance().getList(keyStore);
+		if ( eclipseKeyStoreCollection == null ) {
+			eclipseKeyStoreCollection=new EclipseKeyStoreCollection();
+		}
+		return eclipseKeyStoreCollection.getList(keyStore);
 	}
 
 	public boolean isJavaModulesBased() {

@@ -39,7 +39,6 @@ import org.eclipse.core.security.incoming.IncomingSystemPropertyIfc;
 import org.eclipse.core.security.incoming.SecurityFileSnapshot;
 import org.eclipse.core.security.state.X509SecurityState;
 import org.eclipse.core.security.state.X509SecurityStateIfc;
-import org.eclipse.core.security.util.KeyStoreFormat;
 import org.eclipse.core.security.util.PKIProperties;
 import org.eclipse.core.security.managers.KeyStoreManager;
 import org.eclipse.core.security.managers.ConfigureTrust;
@@ -57,12 +56,13 @@ import org.osgi.framework.ServiceReference;
 public class KeystoreSetup {
 	static boolean isPkcs11Installed = false;
 	static boolean isKeyStoreLoaded = false;
-	PKIProperties pkiInstance = null;
+	
 	Properties pkiProperties = null;
 	SSLContext sslContext = null;
 	CommandSecurity commandSecurity;
 	private BundleContext bundleContext;
 	SecurityComponentIfc securityComponentIfc;
+	@Reference PKIProperties pKIProperties;
 	@Reference KeyStoreManager keyStoreManager;
 	@Reference ConfigureTrust configureTrust;
 	@Reference X509SecurityStateIfc x509SecurityStateIfc;
@@ -81,22 +81,8 @@ public class KeystoreSetup {
 	void activate(ComponentContext ctx) {
 		ActivateSecurity.getInstance().log("KeystoreSetup ACTIVATED."); //$NON-NLS-1$	
 		try {
-			if ( ctx != null ) {
-				
+			if ( ctx != null ) {	
 				ActivateSecurity.getInstance().log("KeystoreSetup ACTIVATED get SECURITYCOMP."); //$NON-NLS-1$	
-				//dumpRefs(ctx);
-				//bundleContext = ctx.getBundleContext();
-				//ServiceReference ref = bundleContext.getServiceReference(CommandSecurity.class.getName());
-				//commandSecurity = (CommandSecurity) bundleContext.getService(ref);
-				//sec.letsGo();
-				ActivateSecurity.getInstance().log("KeystoreSetup ACTIVATED LETSGO");
-//				securityComponentIfc=ctx.locateService("SecurityComponentIfc");
-//				if ( securityComponentIfc != null ) {
-//					ActivateSecurity.getInstance().log("KeystoreSetup ACTIVATED gOT SECURITYCOMP."); //$NON-NLS-1$
-//				} else {
-//					ActivateSecurity.getInstance().log("KeystoreSetup ACTIVATED NULL SECURITYCOMP.");
-//				}
-				//installKeystore();
 			} else {
 				ActivateSecurity.getInstance().log("KeystoreSetup ACTIVATED NULL CONTEXT.");
 			}
@@ -120,14 +106,12 @@ public class KeystoreSetup {
 			if ( keyStoreManager == null ) {
 				keyStoreManager = new KeyStoreManager();
 			}
-			if ( configureTrust == null ) {
-				configureTrust = new ConfigureTrust();
-			}
+			
 			
 			keystoreContainer = Optional.ofNullable(
 					keyStoreManager.getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
 							System.getProperty("javax.net.ssl.keyStorePassword"), //$NON-NLS-1$
-							KeyStoreFormat.valueOf(System.getProperty("javax.net.ssl.keyStoreType")))); //$NON-NLS-1$
+							System.getProperty("javax.net.ssl.keyStoreType"))); //$NON-NLS-1$
 
 			if ((keystoreContainer.isEmpty()) || (!(keyStoreManager.isKeyStoreInitialized()))) {
 				ActivateSecurity.getInstance().log("Failed to Load a Keystore."); //$NON-NLS-1$
@@ -152,16 +136,21 @@ public class KeystoreSetup {
 		if ( incomingSystemPropertyIfc == null ) {
 			incomingSystemPropertyIfc = new IncomingSystemProperty();
 		}
+		if ( configureTrust == null ) {
+			configureTrust = new ConfigureTrust();
+		}
 		
 		if (incomingSystemPropertyIfc.checkTrustStoreType()) {
 			ActivateSecurity.getInstance().log("Activating TrustManager Initialization."); //$NON-NLS-1$
 			if ((incomingSystemPropertyIfc.checkTrustStore())) {
 				x509SecurityStateIfc.setTrustOn(true);
+				ActivateSecurity.getInstance().log("KeystoreSetup setup trust."); //$NON-NLS-1$
 				Optional<X509TrustManager> PKIXtrust = configureTrust.setUp();
 				if (PKIXtrust.isEmpty()) {
 					ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
 					return;
-				} 
+				}
+				ActivateSecurity.getInstance().log("KeystoreSetup trustmanager setting."); //$NON-NLS-1$
 				tm = new TrustManager[] { configureTrust };
 				ActivateSecurity.getInstance().log("TrustManager Initialization Done."); //$NON-NLS-1$
 			} else {
@@ -186,20 +175,20 @@ public class KeystoreSetup {
 	}
 	public void activateSecureContext( KeyManager[] km, TrustManager[] tm ) {
 		try {
-			
+			ActivateSecurity.getInstance().log("KeyStoreSetup processing activateSecureContext"); //$NON-NLS-1$
 			SSLContext ctx = SSLContext.getInstance("TLS");//$NON-NLS-1$
 			ctx.init(km, tm, null);
 			SSLContext.setDefault(ctx);
 			HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
 			setSSLContext(ctx);
-			pkiInstance = PKIProperties.getInstance();
-			pkiInstance.load();
+			pKIProperties = new PKIProperties();
+			pKIProperties.load();
 			//ActivateSecurity.getInstance().setSSLContext(ctx);
 			setUserEmail();
-			ActivateSecurity.getInstance().log("SSLContextFactory PKCSTYPE:"+System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
-			ActivateSecurity.getInstance().log("SSLContextFactory has been configured with SSLContext default."); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("SSLContext PKCSTYPE:"+System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("SSLContext has been configured with SSLContext default."); //$NON-NLS-1$
 			System.setProperty("javax.net.ssl.keyStoreProvider", "PKCS12");
-			ActivateSecurity.getInstance().log("SSLContextFactory PRovider has been set."); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("SSLContext PRovider has been set."); //$NON-NLS-1$
 			
 		} catch (KeyManagementException e) {
 			e.printStackTrace();	
