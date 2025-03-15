@@ -25,11 +25,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.SwingConstants;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ServiceScope;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+//import org.osgi.service.component.annotations.Component;
+//import org.osgi.service.component.annotations.ServiceScope;
+//import org.osgi.service.component.annotations.Reference;
+//import org.osgi.service.component.annotations.Activate;
+//import org.osgi.service.component.ComponentContext;
+
 import org.eclipse.core.security.ActivateSecurity;
 import org.eclipse.core.security.managers.KeyStoreManager;
 
@@ -38,17 +41,13 @@ public class PkiPasswordGrabberWidget implements Callable {
 	JFrame frame = null;
 	Icon icon = null;
 	JPasswordField pword = null;
+	final private String NONE="";
+	private String hiddenPin=NONE;
 	//@Reference KeyStoreManager keyStoreManager;
 	KeyStoreManager keyStoreManager;
 	PublishPasswordUpdate publishPasswordUpdate;
 	public PkiPasswordGrabberWidget() {}
 	
-//	@Activate
-//	void activate() {
-//		if ( keyStoreManager == null ) {
-//			keyStoreManager=new KeyStoreManager();
-//		}
-//	}
 	@Override
 	public Object call() throws Exception {
 		
@@ -57,20 +56,20 @@ public class PkiPasswordGrabberWidget implements Callable {
 		}
 		publishPasswordUpdate = new PublishPasswordUpdate();
 		TimeUnit.SECONDS.sleep(2);
-		String pw = getInput();
-		System.setProperty("javax.net.ssl.keyStorePassword", pw);
-		return pw;
+		setHiddenPin(getInput());
+		System.setProperty("javax.net.ssl.keyStorePassword", this.hiddenPin);
+		return hiddenPin;
 	}
-//	@Override
-//	public void run() {
-//		try {
-//			TimeUnit.SECONDS.sleep(2);
-//			String pw = getInput();
-//			System.setProperty("javax.net.ssl.keyStorePassword", pw);
-//		} catch(Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
+	
+
+	public String getHiddenPin() {
+		return this.hiddenPin;
+	}
+	@AttributeDefinition(name="hiddenPin", type=AttributeType.PASSWORD)
+	public void setHiddenPin(String hiddenPin) {
+		this.hiddenPin = hiddenPin;
+	}
+
 	public String getInput() {
 
 		Optional keystoreContainer = null;		
@@ -130,7 +129,7 @@ public class PkiPasswordGrabberWidget implements Callable {
 					pword.setText("");//$NON-NLS-1$
 					
 				} else {
-					//ActivateSecurity.getInstance().log("PkiPasswordGrabberWidget KEYSTORE FOUND");
+					ActivateSecurity.getInstance().log("PkiPasswordGrabberWidget Return pw");
 					
 					publishPasswordUpdate.publishMessage(pw);
 					

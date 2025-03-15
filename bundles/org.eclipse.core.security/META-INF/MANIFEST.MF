@@ -23,7 +23,9 @@ Import-Package: org.apache.felix.service.command;version="[1.0.0,2.0.0)",
  org.osgi.annotation.bundle;version="[2.0.0,3.0.0)",
  org.osgi.framework;resolution:=optional,
  org.osgi.service.component;version="[1.5.0,2.0.0)",
- org.osgi.service.component.annotations;resolution:=optional
+ org.osgi.service.component.annotations;resolution:=optional,
+ org.osgi.service.metatype;version="[1.4.0,2.0.0)",
+ org.osgi.service.metatype.annotations;version="[1.4.0,2.0.0)"
 Bundle-Vendor: Delmarva Security
 Automatic-Module-Name: org.eclipse.core.security
 Bundle-ActivationPolicy: lazy

@@ -70,6 +70,9 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 	}
 	@Override
 	public void onNext(Object item) {
+		String pw = (String) item;
+		ActivateSecurity.getInstance().log("IncomingSubscriber onNext:"+pw);
+		ActivateSecurity.getInstance().log("IncomingSubscriber onNext:"+System.getProperty("javax.net.ssl.keyStorePassword"));
 		publishedIncoming();
 	}
 	public void publishedIncoming() {

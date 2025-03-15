@@ -46,14 +46,15 @@ public class ActivateSecurity implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		//ActivateSecurity.getInstance().context=context;
 		this.context=context;
+		System.setProperty("core.state", "tracking");
 		ActivateSecurity.getInstance().log("ActivateSecurity start."); //$NON-NLS-1$
 		
 		ServiceRegistration<SecurityComponentIfc> reg = context.registerService(SecurityComponentIfc.class, new SecurityFileSnapshot(), null );
 		
 		tracker = new ServiceTracker(context, SecurityComponentIfc.class.getName(), null);
 		tracker.open();
-		//SecurityComponentIfc securityComponentIfc = (SecurityComponentIfc) tracker.getService();
-		//securityComponentIfc.startup();
+		SecurityComponentIfc securityComponentIfc = (SecurityComponentIfc) tracker.getService();
+		securityComponentIfc.startup();
 		
 		
 		ActivateSecurity.getInstance().log("ActivateSecurity start COMPLETE."); //$NON-NLS-1$

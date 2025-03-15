@@ -154,24 +154,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 //		
 //	}
 //	
-//	@Deactivate
-//	public void deactivate(final ComponentContext context) {
-//		ActivateSecurity.getInstance().log("SecurityFileSnapshot Dectivate INSTANCE#"+instanceNo); //$NON-NLS-1$
-//		
-//		
-//		try {
-//			if ( context != null ) {
-//				ActivateSecurity.getInstance().log("SecurityFileSnapshot Deactivate context"); //$NON-NLS-1$
-//				//context.registerService(SecurityComponentIfc.class, this, null );
-//				//ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context done"); //$NON-NLS-1$
-//			}	
-//			
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//	}
+
 	public boolean isRunning() {
 		ActivateSecurity.getInstance().log("SecurityFileSnapshot isrunning."); //$NON-NLS-1$
 		return isrunning;
@@ -187,10 +170,10 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 		if ( op.isEmpty()) {
 			return;
 		} else {
-			ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- LOAD"); //$NON-NLS-1$
+			ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- STATE:"+op.get()); //$NON-NLS-1$
 			if (!(op.get().equals("loaded"))) {
 				if ( image() ) {
-					System.setProperty("core.state", "inproccess");
+					System.setProperty("core.state", "inprocess");
 					salt = new String(System.getProperty("user.name") + pin).getBytes(); //$NON-NLS-1$
 					load(pin, new String(salt));
 					System.setProperty("core.state", "loaded");
@@ -319,8 +302,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 					if (keyStoreType.equalsIgnoreCase("PKCS12" )) { //$NON-NLS-1$
 						System.setProperty("javax.net.ssl.keyStoreType", keyStoreType);//$NON-NLS-1$
 						x509SecurityStateIfc.setPKCS12on(true);
-						// get the passwd from console
-						//PokeInConsole.PASSWD.get();
+						
 						try {
 							try {
 								Optional<String> testKeyContainer = Optional.ofNullable(
@@ -340,17 +322,19 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 							ActivateSecurity.getInstance().log("SecurityFileSnapshot Subscribe--------------------");
 							PublishPasswordUpdate publishPasswordUpdate = new PublishPasswordUpdate();
 							publishPasswordUpdate.subscribe(subscriber);
+							// get the passwd from swing console
 							PkiPasswordGrabberWidget runner = new PkiPasswordGrabberWidget();
 							
 							ExecutorService es = Executors.newSingleThreadExecutor();
 							List<Future<String>> list = new ArrayList<Future<String>>();
 							
-							//Future<String>future=null;
+							String returnedValue=null;
 							try {
 								es.submit(() -> {
 										System.out.println(" executed by " + Thread.currentThread().getName());
 						                try {
 						                	final Future<String> future = (Future<String>) runner.call();
+						                	future.get();
 						                } catch (InterruptedException ie) {
 						                    es.notifyAll();
 						                } catch (Exception e) {
@@ -359,13 +343,12 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 								            es.shutdownNow();
 								        }
 						            });
-								//list.add(future);
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} 
 							
-							ActivateSecurity.getInstance().log("SecurityFileSnapshot PW RETURNED:");
+							ActivateSecurity.getInstance().log("SecurityFileSnapshot PW RETURNED:"+runner.getHiddenPin());
 							
 							boolean finished = es.awaitTermination(20, TimeUnit.SECONDS);
 							
@@ -411,7 +394,6 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 
 			System.getProperties().putAll(properties);
 
-			//lock.release();
 			ActivateSecurity.getInstance().log("SecurityFileSnapshot Loaded PKI System Properties");// $NON-NLS-1$
 		} catch (IOException e) {
 			e.printStackTrace();
