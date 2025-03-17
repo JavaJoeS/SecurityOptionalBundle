@@ -280,7 +280,6 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 							if ( keyStoreManager == null ) {
 								keyStoreManager= new KeyStoreManager();
 							}
-							ActivateSecurity.getInstance().log("SecurityFileSnapshot Subscribe--------------------");
 							PublishPasswordUpdate publishPasswordUpdate = new PublishPasswordUpdate();
 							publishPasswordUpdate.subscribe(subscriber);
 							// get the passwd from swing console
@@ -305,16 +304,10 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 								        }
 						            });
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								ActivateSecurity.getInstance().log("SecurityFileSnapshot cant execute pw grabber"+e.getMessage());
 							} 
 							
-							ActivateSecurity.getInstance().log("SecurityFileSnapshot PW RETURNED:"+runner.getHiddenPin());
-							
-							boolean finished = es.awaitTermination(20, TimeUnit.SECONDS);
-							
-							ActivateSecurity.getInstance().log("SecurityFileSnapshot Subscribe RETURNED ");
-							
+							boolean finished = es.awaitTermination(20, TimeUnit.SECONDS);	
 						} catch(Exception xe) {
 							// User may have said cancel
 						}
@@ -346,8 +339,6 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 					properties.setProperty("javax.net.ssl.decryptedPassword", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				}
-				ActivateSecurity.getInstance().log("SecurityFileSnapshot preoperty keyStoreType:"+System.getProperty("javax.net.ssl.keyStoreType"));
-				ActivateSecurity.getInstance().log("SecurityFileSnapshot telling publisher to publish-------");
 				subscriber.publishedIncoming();
 			}
 			

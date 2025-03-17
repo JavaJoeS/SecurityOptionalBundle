@@ -19,9 +19,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.security.ActivateSecurity;
-import org.eclipse.core.security.CommandSecurity;
-
 import org.eclipse.core.security.state.X509SecurityStateIfc;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.Activate;
@@ -46,7 +45,7 @@ public class InBoundController {
 	//@Reference SecurityFileSnapshot securityFileSnapshot;
 	@Reference X509SecurityStateIfc x509SecurityStateIfc;
 	@Reference IncomingSystemPropertyIfc incomingProperty;
-	private CommandSecurity commandSecurity;
+	
 	
 	protected static KeyStore keyStore = null;//$NON-NLS-1$
 	BundleContext bundleContext=null;
@@ -67,13 +66,13 @@ public class InBoundController {
 			}
 			
 			ActivateSecurity.getInstance().log("InBoundController Activate INSTANCE:."+instanceNo); //$NON-NLS-1$
-			if ( ctx != null ) {
-				bundleContext = ctx.getBundleContext();
-				ServiceReference ref = bundleContext.getServiceReference(CommandSecurity.class.getName());
-				commandSecurity = (CommandSecurity) bundleContext.getService(ref);
-				commandSecurity.letsGo();
-				commandSecurity.Run();
-			}
+//			if ( ctx != null ) {
+//				bundleContext = ctx.getBundleContext();
+//				ServiceReference ref = bundleContext.getServiceReference(CommandSecurity.class.getName());
+//				commandSecurity = (CommandSecurity) bundleContext.getService(ref);
+//				commandSecurity.letsGo();
+//				commandSecurity.Run();
+//			}
 			
 			if ( x509SecurityStateIfc != null ) {
 				x509SecurityStateIfc.setPKCS11on(false);
@@ -91,9 +90,6 @@ public class InBoundController {
 	public void controller() {
 		Optional<String> keystoreTypeContainer = null;
 		Optional<String> decryptedPw;
-		
-		//state.setPKCS11on(false);
-		//state.setPKCS12on(false);
 		
 		//ActivateSecurity.getInstance().log("InBoundController controller."); //$NON-NLS-1$
 		

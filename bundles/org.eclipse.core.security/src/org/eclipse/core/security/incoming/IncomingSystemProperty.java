@@ -33,25 +33,25 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 	@Reference NormalizeGCM normalizeGCM;
 	public IncomingSystemProperty() {}
 	
-	@Activate
-	void activate(BundleContext bundleContext) {
-		ActivateSecurity.getInstance().log("IncomingSystemProperty ACTIVATE");//$NON-NLS-1$
-		try {
-			if ( bundleContext==null ) {
-				ActivateSecurity.getInstance().log("IncomingSystemProperty ACTIVATE  NULL BC");//$NON-NLS-1$
-			} else {
-				//state=(X509SecurityStateIfc) bundleContext.getService(bundleContext.getServiceReference(X509SecurityState.class.getName()));
-			}
-			if ( x509SecurityStateIfc==null ) {
-				ActivateSecurity.getInstance().log("IncomingSystemProperty ACTIVATE  NULL STATE");//$NON-NLS-1$
-			} else {
-				//checkType();
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	@Activate
+//	void activate(BundleContext bundleContext) {
+//		ActivateSecurity.getInstance().log("IncomingSystemProperty ACTIVATE");//$NON-NLS-1$
+//		try {
+//			if ( bundleContext==null ) {
+//				ActivateSecurity.getInstance().log("IncomingSystemProperty ACTIVATE  NULL BC");//$NON-NLS-1$
+//			} else {
+//				//state=(X509SecurityStateIfc) bundleContext.getService(bundleContext.getServiceReference(X509SecurityState.class.getName()));
+//			}
+//			if ( x509SecurityStateIfc==null ) {
+//				ActivateSecurity.getInstance().log("IncomingSystemProperty ACTIVATE  NULL STATE");//$NON-NLS-1$
+//			} else {
+//				//checkType();
+//			}
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 	
 	public boolean checkType() {
 		Optional<String> type = null;
@@ -79,8 +79,6 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 				return true;
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
 			ActivateSecurity.getInstance().log("IncomingSystemProperty null STATE");//$NON-NLS-1$
 		}
 		return false;
@@ -104,8 +102,6 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 		if (keyStore.isEmpty()) {
 			x509SecurityStateIfc.setPKCS11on(false);
 			x509SecurityStateIfc.setPKCS12on(false);
-			//ActivateSecurity.getInstance().log("No Keystore is set, javax.net.ssl.keyStore."); //$NON-NLS-1$
-			//return false;
 		}
 		keyStorePassword = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword")); //$NON-NLS-1$
 		if (keyStorePassword.isEmpty()) {

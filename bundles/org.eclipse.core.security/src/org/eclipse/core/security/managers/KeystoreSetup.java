@@ -35,7 +35,6 @@ import java.security.cert.X509Certificate;
 
 
 import org.eclipse.core.security.ActivateSecurity;
-import org.eclipse.core.security.CommandSecurity;
 import org.eclipse.core.security.SecurityComponentIfc;
 import org.eclipse.core.security.incoming.IncomingSystemProperty;
 import org.eclipse.core.security.incoming.IncomingSystemPropertyIfc;
@@ -62,7 +61,6 @@ public class KeystoreSetup {
 	
 	Properties pkiProperties = null;
 	SSLContext sslContext = null;
-	CommandSecurity commandSecurity;
 	private BundleContext bundleContext;
 	SecurityComponentIfc securityComponentIfc;
 	@Reference PKIProperties pKIProperties;
@@ -77,26 +75,7 @@ public class KeystoreSetup {
 	
 	
 	public KeystoreSetup() {
-		ActivateSecurity.getInstance().log("KeystoreSetup CONTRUCTOR."); //$NON-NLS-1$	
-		
-	}
-	
-	@Activate
-	void activate(ComponentContext ctx) {
-		ActivateSecurity.getInstance().log("KeystoreSetup ACTIVATED."); //$NON-NLS-1$	
-		try {
-			if ( ctx != null ) {	
-				ActivateSecurity.getInstance().log("KeystoreSetup ACTIVATED get SECURITYCOMP."); //$NON-NLS-1$	
-			} else {
-				ActivateSecurity.getInstance().log("KeystoreSetup ACTIVATED NULL CONTEXT.");
-			}
-			if ( configureTrust == null ) {
-				configureTrust = new ConfigureTrust();
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ActivateSecurity.getInstance().log("KeystoreSetup CONTRUCTOR."); //$NON-NLS-1$		
 	}
 	
 	public void installKeystore() {
@@ -201,7 +180,7 @@ public class KeystoreSetup {
 			setUserEmail();
 			ActivateSecurity.getInstance().log("SSLContext PKCSTYPE:"+System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
 			ActivateSecurity.getInstance().log("SSLContext has been configured with SSLContext default."); //$NON-NLS-1$
-			System.setProperty("javax.net.ssl.keyStoreProvider", "PKCS12");
+			System.setProperty("javax.net.ssl.keyStoreProvider", "SunJSSE");//$NON-NLS-1$ //$NON-NLS-2$
 			
 			ActivateSecurity.getInstance().log("SSLContext PRovider has been set."); //$NON-NLS-1$
 			
@@ -268,43 +247,38 @@ public class KeystoreSetup {
 			return false;
 		}
 	}
-	void dumpRefs(ComponentContext ctc) {
-		
-		try {
-			BundleContext context=ctc.getBundleContext();
-			if (context == null ) {
-				System.out.println("KeystoreSetup NULL BUNDLECONTEXT");
-			}
-			ServiceReference<?>[] references = context.getAllServiceReferences(CommandSecurity.class.getName(), null);
-			if ( references==null) {
-				System.out.println("KeystoreSetup NULL REFERENCES");
-			}
-			for(ServiceReference<?> reference : references) {
-   
-			    String[] keys = reference.getPropertyKeys();
-			    System.out.println("Bundle: "+reference.getBundle().getSymbolicName());
-			    for(String key:keys)
-			    {
-			        System.out.println("\tKey: "+key+ " ["+reference.getProperty(key)+"]");
-
-			    }
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    }
+//	void dumpRefs(ComponentContext ctc) {
+//		
+//		try {
+//			BundleContext context=ctc.getBundleContext();
+//			if (context == null ) {
+//				System.out.println("KeystoreSetup NULL BUNDLECONTEXT");
+//			}
+//			ServiceReference<?>[] references = context.getAllServiceReferences(SecurityComponentIfc.class.getName(), null);
+//			if ( references==null) {
+//				System.out.println("KeystoreSetup NULL REFERENCES");
+//			}
+//			for(ServiceReference<?> reference : references) {
+//   
+//			    String[] keys = reference.getPropertyKeys();
+//			    System.out.println("Bundle: "+reference.getBundle().getSymbolicName());
+//			    for(String key:keys)
+//			    {
+//			        System.out.println("\tKey: "+key+ " ["+reference.getProperty(key)+"]");
+//
+//			    }
+//			}
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//    }
 	void getProviderList() {
 		try {
 		      Provider providers[] = Security.getProviders();
 		      for(Provider p : providers) {
 		    	  System.out.println(p.getName()+ "|" + p.getInfo());
-		      }
-//		      for (int i = 0; i < p.length; i++) {
-//		          System.out.println(p[i]);
-//		          for (Enumeration e = p[i].keys(); e.hasMoreElements();)
-//		              System.out.println("\t" + e.nextElement());
-//		      }
+		       }
 		    } catch (Exception e) {
 		      System.out.println(e);
 		    }
