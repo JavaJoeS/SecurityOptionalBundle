@@ -15,6 +15,9 @@ package org.eclipse.core.security;
 
 import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.core.security.incoming.SecurityFileSnapshot;
+
+import java.util.Optional;
+
 import org.eclipse.core.runtime.ILog;
 
 
@@ -24,16 +27,16 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 /*
- *  Activator for Security bundle
+ *  Activator for Security bundle to support optional PKI configuration
  */
 
 public class ActivateSecurity implements BundleActivator {
 	public static final String ID = "org.eclipse.core.security"; //$NON-NLS-1$
 	private static ActivateSecurity instance;
 	private BundleContext context;
-	ServiceRegistration securityService;
+	ServiceRegistration <SecurityComponentIfc>securityService;
 	ServiceTracker tracker;
-	//@Reference SecurityComponentIfc securityComponentIfc;
+	
 	
 	private static final ServiceCaller<ILog> logger = new ServiceCaller(ActivateSecurity.class, ILog.class);
 	
@@ -44,20 +47,16 @@ public class ActivateSecurity implements BundleActivator {
 	
 	@Override
 	public void start(BundleContext context) throws Exception {
-		//ActivateSecurity.getInstance().context=context;
 		this.context=context;
-		System.setProperty("core.state", "tracking");
-		ActivateSecurity.getInstance().log("ActivateSecurity start."); //$NON-NLS-1$
-		
-		ServiceRegistration<SecurityComponentIfc> reg = context.registerService(SecurityComponentIfc.class, new SecurityFileSnapshot(), null );
-		
-		tracker = new ServiceTracker(context, SecurityComponentIfc.class.getName(), null);
-		tracker.open();
-		SecurityComponentIfc securityComponentIfc = (SecurityComponentIfc) tracker.getService();
-		securityComponentIfc.startup();
-		
-		
-		ActivateSecurity.getInstance().log("ActivateSecurity start COMPLETE."); //$NON-NLS-1$
+		Optional<String> stateOp = Optional.ofNullable(System.getProperty("core.state"));
+		if (stateOp.isEmpty()) {
+			System.setProperty("core.state", "tracking");//$NON-NLS-1$ //$NON-NLS-2$
+			securityService = context.registerService(SecurityComponentIfc.class, new SecurityFileSnapshot(), null );
+			tracker = new ServiceTracker(context, SecurityComponentIfc.class.getName(), null);
+			tracker.open();
+			SecurityComponentIfc securityComponentIfc = (SecurityComponentIfc) tracker.getService();
+			securityComponentIfc.startup();
+		}
 	}
 	@Override
 	public void stop(BundleContext context) throws Exception {

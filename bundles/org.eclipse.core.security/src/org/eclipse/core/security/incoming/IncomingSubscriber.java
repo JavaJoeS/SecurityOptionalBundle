@@ -70,9 +70,6 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 	}
 	@Override
 	public void onNext(Object item) {
-		String pw = (String) item;
-		ActivateSecurity.getInstance().log("IncomingSubscriber onNext:"+pw);
-		ActivateSecurity.getInstance().log("IncomingSubscriber onNext:"+System.getProperty("javax.net.ssl.keyStorePassword"));
 		publishedIncoming();
 	}
 	public void publishedIncoming() {
@@ -135,16 +132,13 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ActivateSecurity.getInstance().log("Invalid properties have been set:"+e.getMessage());
 		}
 	}
 	@Override
 	public void onError(Throwable throwable) {		
 	}
 	@Override
-	public void onComplete() {
-		
+	public void onComplete() {	
 	}
-
 }

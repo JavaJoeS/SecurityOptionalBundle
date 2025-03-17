@@ -68,11 +68,9 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
  * and reads it in if its there, otherwise nothing.
  */
 
-@Component(immediate=true,
-//@Component(
+//@Component(immediate=true,
+@Component(
 	service=SecurityComponentIfc.class,
-//	configurationPolicy=ConfigurationPolicy.REQUIRE,
-//	scope=ServiceScope.BUNDLE)
 	scope=ServiceScope.SINGLETON)
 public class SecurityFileSnapshot implements SecurityComponentIfc {
 	private static AtomicInteger instanceCounter = new AtomicInteger();
@@ -113,48 +111,14 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 			if (op.get().equals("running")) {
 				startup();
 			}
-		}
-		
+		}	
 	}
 	
-//	@Activate
-//	public void activate(final ComponentContext context) {
-//		ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate INSTANCE#"+instanceNo); //$NON-NLS-1$
-//		
-//		
-//		try {
-//			if ( context != null ) {
-//				ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context"); //$NON-NLS-1$
-//				//context.registerService(SecurityComponentIfc.class, this, null );
-//				//ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context done"); //$NON-NLS-1$
-//			}	
-//			
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//	}
-//	@Modified
-//	public void modified(final ComponentContext context) {
-//		ActivateSecurity.getInstance().log("SecurityFileSnapshot modified INSTANCE#"+instanceNo); //$NON-NLS-1$
-//		
-//		
-//		try {
-//			if ( context != null ) {
-//				ActivateSecurity.getInstance().log("SecurityFileSnapshot modified context"); //$NON-NLS-1$
-//				//context.registerService(SecurityComponentIfc.class, this, null );
-//				//ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate context done"); //$NON-NLS-1$
-//			}	
-//			
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
-//	}
-//	
-
+	@Activate
+	public void activate(final ComponentContext context) {
+		ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate INSTANCE#"+instanceNo); //$NON-NLS-1$
+	}
+	
 	public boolean isRunning() {
 		ActivateSecurity.getInstance().log("SecurityFileSnapshot isrunning."); //$NON-NLS-1$
 		return isrunning;
@@ -276,12 +240,9 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 			
 			
 			for (Entry<Object, Object> entry : properties.entrySet()) {
-				//ActivateSecurity.getInstance().log("SecurityFileSnapshot preoperty:"+entry.toString());
 				entry.setValue(entry.getValue().toString().trim());
 			}
 			
-			ActivateSecurity.getInstance().log("SecurityFileSnapshot preoperty keyStoreType:"+properties.getProperty("javax.net.ssl.keyStoreType"));
-			ActivateSecurity.getInstance().log("SecurityFileSnapshot  properties all loaded--------");
 			Optional<String> passwdContainer = Optional
 					.ofNullable(properties.getProperty("javax.net.ssl.keyStorePassword")); //$NON-NLS-1$
 			Optional<String> encryptedPasswd = Optional

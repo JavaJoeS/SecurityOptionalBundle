@@ -27,6 +27,9 @@ import javax.net.ssl.X509TrustManager;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
@@ -180,13 +183,14 @@ public class KeystoreSetup {
 	}
 	public void activateSecureContext( KeyManager[] km, TrustManager[] tm ) {
 		try {
-			Optional op = Optional.ofNullable(System.getProperty("core.state"));
+			Optional<String> op = Optional.ofNullable(System.getProperty("core.state"));
 			if (!(op.isEmpty())) {
 				ActivateSecurity.getInstance().log("KeystoreSetup activateSecureContext  STATE:."+op.get()); //$NON-NLS-1$
 			}
 			
 			ActivateSecurity.getInstance().log("KeyStoreSetup processing activateSecureContext"); //$NON-NLS-1$
 			SSLContext ctx = SSLContext.getInstance("TLS");//$NON-NLS-1$
+			
 			ctx.init(km, tm, null);
 			SSLContext.setDefault(ctx);
 			HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
@@ -198,15 +202,15 @@ public class KeystoreSetup {
 			ActivateSecurity.getInstance().log("SSLContext PKCSTYPE:"+System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
 			ActivateSecurity.getInstance().log("SSLContext has been configured with SSLContext default."); //$NON-NLS-1$
 			System.setProperty("javax.net.ssl.keyStoreProvider", "PKCS12");
+			
 			ActivateSecurity.getInstance().log("SSLContext PRovider has been set."); //$NON-NLS-1$
 			
-			System.out.println("KeystoreSetup SSLContext has been CONFIGURED");
 			
 		} catch (KeyManagementException e) {
 			e.printStackTrace();	
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
-		} 
+		}
 	}
 	public SSLContext getSSLContext() {
 		return sslContext;
@@ -290,4 +294,19 @@ public class KeystoreSetup {
 			e.printStackTrace();
 		}
     }
+	void getProviderList() {
+		try {
+		      Provider providers[] = Security.getProviders();
+		      for(Provider p : providers) {
+		    	  System.out.println(p.getName()+ "|" + p.getInfo());
+		      }
+//		      for (int i = 0; i < p.length; i++) {
+//		          System.out.println(p[i]);
+//		          for (Enumeration e = p[i].keys(); e.hasMoreElements();)
+//		              System.out.println("\t" + e.nextElement());
+//		      }
+		    } catch (Exception e) {
+		      System.out.println(e);
+		    }
+	}
 }
