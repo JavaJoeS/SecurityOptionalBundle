@@ -41,8 +41,7 @@ public class InBoundController {
 	private static AtomicBoolean activated = new AtomicBoolean();
 	private int instanceNo=0;
 	protected final String pin = "#Gone2Boat@Bay"; //$NON-NLS-1$
-	Optional<KeyStore> keystoreContainer = null;//$NON-NLS-1$
-	//@Reference SecurityFileSnapshot securityFileSnapshot;
+	Optional<KeyStore>keystoreContainer = null;
 	@Reference X509SecurityStateIfc x509SecurityStateIfc;
 	@Reference IncomingSystemPropertyIfc incomingProperty;
 	
@@ -66,13 +65,6 @@ public class InBoundController {
 			}
 			
 			ActivateSecurity.getInstance().log("InBoundController Activate INSTANCE:."+instanceNo); //$NON-NLS-1$
-//			if ( ctx != null ) {
-//				bundleContext = ctx.getBundleContext();
-//				ServiceReference ref = bundleContext.getServiceReference(CommandSecurity.class.getName());
-//				commandSecurity = (CommandSecurity) bundleContext.getService(ref);
-//				commandSecurity.letsGo();
-//				commandSecurity.Run();
-//			}
 			
 			if ( x509SecurityStateIfc != null ) {
 				x509SecurityStateIfc.setPKCS11on(false);

@@ -32,6 +32,9 @@ import org.osgi.service.component.annotations.Component;
 
 import org.eclipse.core.security.ActivateSecurity;
 
+/*
+ * This class will check for a file installed 
+ */
 @Component(scope=ServiceScope.SINGLETON)
 public class DotPkiPropertiesRequired {
 	
@@ -73,7 +76,7 @@ public class DotPkiPropertiesRequired {
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			ActivateSecurity.getInstance().log("DotPkiPropertiesRequired checks for pki file failed");
 		}
 			
 		return false;

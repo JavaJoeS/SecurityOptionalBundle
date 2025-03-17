@@ -27,6 +27,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.component.annotations.Component;
 
+/*
+ *  This is  decryption class to normalize a password field that had been encrypted
+ */
 
 
 @Component(scope=ServiceScope.SINGLETON)

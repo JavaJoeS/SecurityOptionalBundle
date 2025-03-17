@@ -26,32 +26,15 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.ServiceScope;
 
-
+/*
+ * This class checks to make sure the correct type is imported
+ * 
+ */
 @Component(scope=ServiceScope.SINGLETON)
 public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 	@Reference X509SecurityStateIfc x509SecurityStateIfc;
 	@Reference NormalizeGCM normalizeGCM;
 	public IncomingSystemProperty() {}
-	
-//	@Activate
-//	void activate(BundleContext bundleContext) {
-//		ActivateSecurity.getInstance().log("IncomingSystemProperty ACTIVATE");//$NON-NLS-1$
-//		try {
-//			if ( bundleContext==null ) {
-//				ActivateSecurity.getInstance().log("IncomingSystemProperty ACTIVATE  NULL BC");//$NON-NLS-1$
-//			} else {
-//				//state=(X509SecurityStateIfc) bundleContext.getService(bundleContext.getServiceReference(X509SecurityState.class.getName()));
-//			}
-//			if ( x509SecurityStateIfc==null ) {
-//				ActivateSecurity.getInstance().log("IncomingSystemProperty ACTIVATE  NULL STATE");//$NON-NLS-1$
-//			} else {
-//				//checkType();
-//			}
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
 	
 	public boolean checkType() {
 		Optional<String> type = null;

@@ -21,6 +21,10 @@ import java.security.cert.CertificateEncodingException;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.component.annotations.Component;
 
+/*
+ *   This class fingerprints a Certificate
+ */
+
 @Component(scope=ServiceScope.SINGLETON)
 public class FingerprintX509 {
 	private static final char[] HEX= {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};

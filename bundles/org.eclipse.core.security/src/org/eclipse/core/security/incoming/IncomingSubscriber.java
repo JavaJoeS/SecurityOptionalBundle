@@ -49,21 +49,20 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 	protected static KeyStore keyStore = null;//$NON-NLS-1$
 	public IncomingSubscriber() {}
 	
-	@Activate
-	void activate() {
-		//new IncomingSubscriber();
-		
-		try {
-			//setup = new KeystoreSetup();
-			if ( incomingSystemPropertyIfc == null ) {
-				ActivateSecurity.getInstance().log("IncomingSubscriber incomingproperties are set to NULL.");
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		ActivateSecurity.getInstance().log("IncomingSubscriber Instance SETUP Done.");
-	}
+//	@Activate
+//	void activate() {
+//		
+//		try {
+//			//setup = new KeystoreSetup();
+//			if ( incomingSystemPropertyIfc == null ) {
+//				ActivateSecurity.getInstance().log("IncomingSubscriber incomingproperties are set to NULL.");
+//			}
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		ActivateSecurity.getInstance().log("IncomingSubscriber Instance SETUP Done.");
+//	}
 	
 	@Override
 	public void onSubscribe(Subscription subscription) {	
@@ -84,8 +83,7 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 		}
 		if (keystoreSetup == null ) {
 			keystoreSetup= new KeystoreSetup();
-		}
-		
+		}	
 		
 		try {
 			if (incomingSystemPropertyIfc.checkType()) {

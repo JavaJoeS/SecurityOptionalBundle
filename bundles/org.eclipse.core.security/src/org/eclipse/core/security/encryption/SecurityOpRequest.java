@@ -16,6 +16,10 @@ package org.eclipse.core.security.encryption;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
+/*
+ * This class represent the state of a pki connection
+ */
+
 @Component(scope=ServiceScope.SINGLETON)
 public class SecurityOpRequest {
 	

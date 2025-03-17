@@ -36,14 +36,15 @@ import org.osgi.service.metatype.annotations.AttributeType;
 import org.eclipse.core.security.ActivateSecurity;
 import org.eclipse.core.security.managers.KeyStoreManager;
 
-
+/*
+ * This class pulls a password from a dialog and updates the appropriate system property
+ */
 public class PkiPasswordGrabberWidget implements Callable {
 	JFrame frame = null;
 	Icon icon = null;
 	JPasswordField pword = null;
 	final private String NONE="";
 	private String hiddenPin=NONE;
-	//@Reference KeyStoreManager keyStoreManager;
 	KeyStoreManager keyStoreManager;
 	PublishPasswordUpdate publishPasswordUpdate;
 	public PkiPasswordGrabberWidget() {}

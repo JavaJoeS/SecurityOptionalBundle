@@ -68,7 +68,6 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
  * and reads it in if its there, otherwise nothing.
  */
 
-//@Component(immediate=true,
 @Component(
 	service=SecurityComponentIfc.class,
 	scope=ServiceScope.SINGLETON)
@@ -114,10 +113,10 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 		}	
 	}
 	
-	@Activate
-	public void activate(final ComponentContext context) {
-		ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate INSTANCE#"+instanceNo); //$NON-NLS-1$
-	}
+//	@Activate
+//	public void activate(final ComponentContext context) {
+//		ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate INSTANCE#"+instanceNo); //$NON-NLS-1$
+//	}
 	
 	public boolean isRunning() {
 		ActivateSecurity.getInstance().log("SecurityFileSnapshot isrunning."); //$NON-NLS-1$

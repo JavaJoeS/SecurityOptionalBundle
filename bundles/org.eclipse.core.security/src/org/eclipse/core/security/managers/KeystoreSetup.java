@@ -50,9 +50,11 @@ import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+/*
+ *   This class checks the keystore type that have been input and ensure they match 
+ */
 
 @Component(scope=ServiceScope.SINGLETON)
 public class KeystoreSetup {
@@ -61,7 +63,7 @@ public class KeystoreSetup {
 	
 	Properties pkiProperties = null;
 	SSLContext sslContext = null;
-	private BundleContext bundleContext;
+	
 	SecurityComponentIfc securityComponentIfc;
 	@Reference PKIProperties pKIProperties;
 	@Reference KeyStoreManager keyStoreManager;
@@ -74,14 +76,9 @@ public class KeystoreSetup {
 	private static final int CRL_SIGN = 6;
 	
 	
-	public KeystoreSetup() {
-		ActivateSecurity.getInstance().log("KeystoreSetup CONTRUCTOR."); //$NON-NLS-1$		
-	}
-	
+	public KeystoreSetup() {}
 	public void installKeystore() {
 		Optional<KeyStore> keystoreContainer = null;
-		
-		ActivateSecurity.getInstance().log("KeystoreSetup installKeystore."); //$NON-NLS-1$
 		try {
 			if ( x509SecurityStateIfc == null ) {
 				x509SecurityStateIfc = new X509SecurityState();
@@ -89,8 +86,6 @@ public class KeystoreSetup {
 			if ( keyStoreManager == null ) {
 				keyStoreManager = new KeyStoreManager();
 			}
-			
-			
 			keystoreContainer = Optional.ofNullable(
 					keyStoreManager.getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
 							System.getProperty("javax.net.ssl.keyStorePassword"), //$NON-NLS-1$
@@ -178,7 +173,6 @@ public class KeystoreSetup {
 			pKIProperties.load();
 			//ActivateSecurity.getInstance().setSSLContext(ctx);
 			setUserEmail();
-			ActivateSecurity.getInstance().log("SSLContext PKCSTYPE:"+System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
 			ActivateSecurity.getInstance().log("SSLContext has been configured with SSLContext default."); //$NON-NLS-1$
 			System.setProperty("javax.net.ssl.keyStoreProvider", "SunJSSE");//$NON-NLS-1$ //$NON-NLS-2$
 			
@@ -247,32 +241,7 @@ public class KeystoreSetup {
 			return false;
 		}
 	}
-//	void dumpRefs(ComponentContext ctc) {
-//		
-//		try {
-//			BundleContext context=ctc.getBundleContext();
-//			if (context == null ) {
-//				System.out.println("KeystoreSetup NULL BUNDLECONTEXT");
-//			}
-//			ServiceReference<?>[] references = context.getAllServiceReferences(SecurityComponentIfc.class.getName(), null);
-//			if ( references==null) {
-//				System.out.println("KeystoreSetup NULL REFERENCES");
-//			}
-//			for(ServiceReference<?> reference : references) {
-//   
-//			    String[] keys = reference.getPropertyKeys();
-//			    System.out.println("Bundle: "+reference.getBundle().getSymbolicName());
-//			    for(String key:keys)
-//			    {
-//			        System.out.println("\tKey: "+key+ " ["+reference.getProperty(key)+"]");
-//
-//			    }
-//			}
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//    }
+
 	void getProviderList() {
 		try {
 		      Provider providers[] = Security.getProviders();

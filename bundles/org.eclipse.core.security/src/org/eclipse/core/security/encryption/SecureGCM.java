@@ -27,6 +27,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.component.annotations.Component;
 
+/* 
+ * This is an encryption class to encrypt a password that was entered in the clear
+ */
 
 @Component(scope=ServiceScope.SINGLETON)
 public class SecureGCM {
