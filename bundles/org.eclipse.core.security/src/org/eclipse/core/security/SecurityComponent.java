@@ -36,14 +36,10 @@ public class SecurityComponent {
 	
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	public void bindSecurityService(SecurityComponentIfc securityComponentIfc) {
-		
-		ActivateSecurity.getInstance().log("SecurityComponent bindSecurityService.");
 		securityComponentIfc=securityComponentIfc;
 		Optional stateContainer = Optional.ofNullable(System.getProperty("core.state"));
 		if ( stateContainer.isEmpty()) {
 			System.setProperty("core.state", "running");
-		} else {		
-			ActivateSecurity.getInstance().log("SecurityComponent bindSecurityService. STATE:"+stateContainer.get());
 		}
 	}
 	void unbindSecurityService(SecurityComponentIfc securityComponentIfc) {

@@ -123,16 +123,13 @@ public class KeystoreSetup {
 		}
 		
 		if (incomingSystemPropertyIfc.checkTrustStoreType()) {
-			ActivateSecurity.getInstance().log("Activating TrustManager Initialization."); //$NON-NLS-1$
 			if ((incomingSystemPropertyIfc.checkTrustStore())) {
 				x509SecurityStateIfc.setTrustOn(true);
-				ActivateSecurity.getInstance().log("KeystoreSetup setup trust."); //$NON-NLS-1$
 				Optional<X509TrustManager> PKIXtrust = configureTrust.setUp();
 				if (PKIXtrust.isEmpty()) {
 					ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
 					return;
 				}
-				ActivateSecurity.getInstance().log("KeystoreSetup trustmanager setting."); //$NON-NLS-1$
 				tm = new TrustManager[] { configureTrust };
 				ActivateSecurity.getInstance().log("TrustManager Initialization Done."); //$NON-NLS-1$
 			} else {
@@ -157,12 +154,7 @@ public class KeystoreSetup {
 	}
 	public void activateSecureContext( KeyManager[] km, TrustManager[] tm ) {
 		try {
-			Optional<String> op = Optional.ofNullable(System.getProperty("core.state"));
-			if (!(op.isEmpty())) {
-				ActivateSecurity.getInstance().log("KeystoreSetup activateSecureContext  STATE:."+op.get()); //$NON-NLS-1$
-			}
 			
-			ActivateSecurity.getInstance().log("KeyStoreSetup processing activateSecureContext"); //$NON-NLS-1$
 			SSLContext ctx = SSLContext.getInstance("TLS");//$NON-NLS-1$
 			
 			ctx.init(km, tm, null);
@@ -180,9 +172,9 @@ public class KeystoreSetup {
 			
 			
 		} catch (KeyManagementException e) {
-			e.printStackTrace();	
+			ActivateSecurity.getInstance().log("KeystoreSetup - A KeyManagement error occured:"+e.getMessage());
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			ActivateSecurity.getInstance().log("KeystoreSetup - No Algorithm for Provider:"+e.getMessage());
 		}
 	}
 	public SSLContext getSSLContext() {

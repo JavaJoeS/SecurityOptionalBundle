@@ -27,23 +27,18 @@ public class X509SecurityState implements X509SecurityStateIfc {
 	private static boolean isPKCS11on=false;
 	private static boolean isPKCS12on=false;
 	private static boolean isTrustOn=false;
-	public X509SecurityState() {
-		ActivateSecurity.getInstance().log("X509SecurityState CONSTRUCTOR"); //$NON-NLS-1$
-	}
+	public X509SecurityState() {}
 	
 	public boolean isPKCS11on() {
 		return isPKCS11on;
 	}
 	public void setPKCS11on(boolean state) {
-		ActivateSecurity.getInstance().log("X509SecurityState setPKCS11on:"+state); //$NON-NLS-1$
 		this.isPKCS11on = state;
 	}
 	public boolean isPKCS12on() {
-		ActivateSecurity.getInstance().log("X509SecurityState isPKCS12on:"+isPKCS12on); //$NON-NLS-1$
 		return isPKCS12on;
 	}
 	public void setPKCS12on(boolean state) {
-		ActivateSecurity.getInstance().log("X509SecurityState setPKCS12on:"+state); //$NON-NLS-1$
 		this.isPKCS12on = state;
 	}
 	public boolean isTrustOn() {

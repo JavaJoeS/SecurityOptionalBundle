@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import org.osgi.service.component.annotations.ServiceScope;
+import org.eclipse.core.security.ActivateSecurity;
 import org.osgi.service.component.annotations.Component;
 
 @Component(scope=ServiceScope.SINGLETON)
@@ -60,7 +61,7 @@ public class TemplateForPKIfile {
 			Files.write(path, (hashTag + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
 			Files.write(path, (hashTag + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
 			Files.write(path, ((buildBuffer()) + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
-
+			ActivateSecurity.getInstance().log("A pki.template file has been created in your home/.eclipse dir.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -77,15 +78,15 @@ public class TemplateForPKIfile {
 		b.append("javax.net.ssl.keyStoreType="); //$NON-NLS-1$
 		b.append("[types allowed; PCKS11, PKCS12]"); //$NON-NLS-1$
 		b.append(System.lineSeparator());
-		b.append("javax.net.ssl.keyStoreProvider="); //$NON-NLS-1$
-		b.append("[SunPKCS11, PKCS12]"); //$NON-NLS-1$
 		b.append(System.lineSeparator());
 		b.append("javax.net.ssl.trustStore="); //$NON-NLS-1$
 		b.append("[Fully quallified name of your Truststore File]"); //$NON-NLS-1$
 		b.append(System.lineSeparator());
 		b.append("javax.net.ssl.trustStorePassword="); //$NON-NLS-1$
+		b.append("[Your truststore passwd, usually changeit, unless customized]"); //$NON-NLS-1$
 		b.append(System.lineSeparator());
 		b.append("javax.net.ssl.trustStoreType="); //$NON-NLS-1$
+		b.append("[types allowed; JKS]"); //$NON-NLS-1$
 		b.append(System.lineSeparator());
 		b.append(hashTag);
 		b.append(System.lineSeparator());

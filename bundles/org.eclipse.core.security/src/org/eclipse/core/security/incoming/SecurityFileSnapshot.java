@@ -98,34 +98,16 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 	@Reference NormalizeGCM	normalizeGCM;
 	
 	public SecurityFileSnapshot() {
-		
 		instanceNo = instanceCounter.incrementAndGet();
-		ActivateSecurity.getInstance().log("SecurityFileSnapshot CONTRUCTOR COUNT:"+instanceNo); //$NON-NLS-1$
-		
 		Optional op = Optional.ofNullable(System.getProperty("core.state"));
-		if ( op.isEmpty()) {
-			ActivateSecurity.getInstance().log("SecurityFileSnapshot EMPTY OP"); 
-		} else {
-			ActivateSecurity.getInstance().log("SecurityFileSnapshot OP:"+op.get());
+		if ( !( op.isEmpty())) {
 			if (op.get().equals("running")) {
 				startup();
 			}
 		}	
 	}
-	
-//	@Activate
-//	public void activate(final ComponentContext context) {
-//		ActivateSecurity.getInstance().log("SecurityFileSnapshot Activate INSTANCE#"+instanceNo); //$NON-NLS-1$
-//	}
-	
-	public boolean isRunning() {
-		ActivateSecurity.getInstance().log("SecurityFileSnapshot isrunning."); //$NON-NLS-1$
-		return isrunning;
-	}
 	public void startup() {
-		ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- startup"); //$NON-NLS-1$
 		
-		ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- startup  NOW LOADING:"); //$NON-NLS-1$
 		if ( x509SecurityStateIfc == null) {
 			x509SecurityStateIfc=new X509SecurityState();
 		}
@@ -133,17 +115,15 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 		if ( op.isEmpty()) {
 			return;
 		} else {
-			ActivateSecurity.getInstance().log("SecurityFileSnapshot ----- STATE:"+op.get()); //$NON-NLS-1$
 			if (!(op.get().equals("loaded"))) {
 				if ( image() ) {
 					System.setProperty("core.state", "inprocess");
 					salt = new String(System.getProperty("user.name") + pin).getBytes(); //$NON-NLS-1$
 					load(pin, new String(salt));
 					System.setProperty("core.state", "loaded");
-				} else {
-					ActivateSecurity.getInstance().log("SecurityFileSnapshot DEACTIVATEd."); //$NON-NLS-1$
-				}
+				} 
 			} 
+			// otherwise no pki file was present
 		}
 	}
 
@@ -177,7 +157,14 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 					 * FileSystems.getDefault().getSeparator()+DotEclipse+
 					 * FileSystems.getDefault().getSeparator()+ ".pki"));
 					 */
-					templateForPKIfile.setup();
+					try {
+						if (templateForPKIfile == null ) {
+							templateForPKIfile=new TemplateForPKIfile();
+						}
+						templateForPKIfile.setup();
+					} catch (Exception e) {
+						return false;
+					}
 					return false;
 				}
 			}

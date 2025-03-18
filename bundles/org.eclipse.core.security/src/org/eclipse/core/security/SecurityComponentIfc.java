@@ -10,5 +10,4 @@ public interface SecurityComponentIfc {
 	public boolean image();
 	public boolean createPKI();
 	public Properties load(String password, String salt);
-	public boolean isRunning();
 }
