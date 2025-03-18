@@ -33,8 +33,6 @@ import javax.net.ssl.X509TrustManager;
 import org.eclipse.core.security.ActivateSecurity;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.ServiceScope;
 
 @Component(scope=ServiceScope.SINGLETON)
