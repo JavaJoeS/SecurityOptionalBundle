@@ -38,7 +38,6 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 	
 	public boolean checkType() {
 		Optional<String> type = null;
-		ActivateSecurity.getInstance().log("IncomingSystemProperty PROPERTY KEYstoreType:"+System.getProperty("javax.net.ssl.keyStoreType"));//$NON-NLS-1$
 		if ( x509SecurityStateIfc == null ) {
 			x509SecurityStateIfc = new X509SecurityState();
 		}

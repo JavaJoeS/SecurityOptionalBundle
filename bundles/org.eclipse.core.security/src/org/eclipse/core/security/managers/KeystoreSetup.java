@@ -98,7 +98,6 @@ public class KeystoreSetup {
 				System.clearProperty("javax.net.ssl.keyStore"); //$NON-NLS-1$
 				System.clearProperty("javax.net.ssl.keyStoreProvider"); //$NON-NLS-1$
 				System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
-				//SecurityFileSnapshot.getInstance().restoreProperties();
 			} else {
 				ActivateSecurity.getInstance().log("A Keystore and Password are detected."); //$NON-NLS-1$
 				keyStore = keystoreContainer.get();
@@ -116,10 +115,6 @@ public class KeystoreSetup {
 		}
 		if ( configureTrust == null ) {
 			configureTrust = new ConfigureTrust();
-		}
-		Optional op = Optional.ofNullable(System.getProperty("core.state"));
-		if (!(op.isEmpty())) {
-			ActivateSecurity.getInstance().log("KeystoreSetup setPkiContext STATE:."+op.get()); //$NON-NLS-1$
 		}
 		
 		if (incomingSystemPropertyIfc.checkTrustStoreType()) {
@@ -140,7 +135,6 @@ public class KeystoreSetup {
 		
 		if (isKeyStoreLoaded) {
 			if (keyStoreManager.isKeyStoreInitialized()) {
-				ActivateSecurity.getInstance().log("A KeyStore detected."); //$NON-NLS-1$
 				try {
 					km = new KeyManager[] { keyStoreManager };
 				} catch (Exception e) {

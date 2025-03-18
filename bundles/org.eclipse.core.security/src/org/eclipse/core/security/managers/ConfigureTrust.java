@@ -86,7 +86,6 @@ public class ConfigureTrust implements X509TrustManager {
 			for (TrustManager tm : tms) {
 				if (tm instanceof X509TrustManager) {
 					pkixTrustManager = (X509TrustManager) tm;
-					ActivateSecurity.getInstance().log("Initialization PKIX Trust Manager Complete"); //$NON-NLS-1$
 					break;
 				}
 			}

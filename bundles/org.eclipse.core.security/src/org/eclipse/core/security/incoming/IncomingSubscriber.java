@@ -49,21 +49,6 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 	protected static KeyStore keyStore = null;//$NON-NLS-1$
 	public IncomingSubscriber() {}
 	
-//	@Activate
-//	void activate() {
-//		
-//		try {
-//			//setup = new KeystoreSetup();
-//			if ( incomingSystemPropertyIfc == null ) {
-//				ActivateSecurity.getInstance().log("IncomingSubscriber incomingproperties are set to NULL.");
-//			}
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		ActivateSecurity.getInstance().log("IncomingSubscriber Instance SETUP Done.");
-//	}
-	
 	@Override
 	public void onSubscribe(Subscription subscription) {	
 	}
@@ -74,7 +59,6 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 	public void publishedIncoming() {
 		Optional<String> keystoreTypeContainer = null;
 		Optional<String> decryptedPw;
-		ActivateSecurity.getInstance().log("IncomingSubscriber processing event.");
 		if ( incomingSystemPropertyIfc == null ) {
 			incomingSystemPropertyIfc = new IncomingSystemProperty();
 		}
@@ -92,18 +76,13 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 					if (x509SecurityStateIfc.isTrustOn()) {
 						keystoreSetup.installKeystore();
 						keystoreSetup.setPkiContext();
-					} else {
-						ActivateSecurity.getInstance().log("IncomingSubscriber TRUST IS NOT ON.");
-					}
+					} 
 					if (x509SecurityStateIfc.isPKCS12on()) {
 						keystoreSetup.installKeystore();
 						keystoreSetup.setPkiContext();
-					} else {
-						ActivateSecurity.getInstance().log("IncomingSubscriber PKCS12 is NOT TURNED ON.");
-					}
+					} 
 					if (x509SecurityStateIfc.isPKCS11on()) {
 						String pkcs11Pin = "";//$NON-NLS-1$
-						ActivateSecurity.getInstance().log("Processing PKCS11 setup.");//$NON-NLS-1$
 						
 						decryptedPw = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword"));
 						if (!decryptedPw.isEmpty()) {

@@ -111,7 +111,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 		if ( x509SecurityStateIfc == null) {
 			x509SecurityStateIfc=new X509SecurityState();
 		}
-		Optional op = Optional.ofNullable(System.getProperty("core.state"));
+		Optional<String>op = Optional.ofNullable(System.getProperty("core.state"));
 		if ( op.isEmpty()) {
 			return;
 		} else {
@@ -137,15 +137,9 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 				if (Files.exists(Paths.get(USER_HOME + FileSystems.getDefault().getSeparator() + DotEclipse
 						+ FileSystems.getDefault().getSeparator() + ".pki"))) {
 					
-					ActivateSecurity.getInstance().log("SecurityFileSnapshot loading image");
 					userDotEclipseHome = Paths.get(USER_HOME + FileSystems.getDefault().getSeparator() + DotEclipse
 							+ FileSystems.getDefault().getSeparator() + ".pki");
 					
-//					if (!DotPkiPropertiesRequired.getInstance().testFile(userDotEclipseHome)) {
-//						TemplateForPKIfile.getInstance().setup();
-//						ActivateSecurity.getInstance().log("SecurityFileSnapshot loading poookooo");
-//						return false;
-//					}
 				} else {
 					/*
 					 *  This would be the completion of this bundle,
@@ -332,11 +326,10 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 
 			System.getProperties().putAll(properties);
 
-			ActivateSecurity.getInstance().log("SecurityFileSnapshot Loaded PKI System Properties");// $NON-NLS-1$
+			ActivateSecurity.getInstance().log("Loaded PKI System Properties");// $NON-NLS-1$
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		ActivateSecurity.getInstance().log("SecurityFileSnapshot loaded PKI properties--------------------");
 		return properties;
 	}
 

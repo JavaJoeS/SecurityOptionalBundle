@@ -124,13 +124,12 @@ public class PkiPasswordGrabberWidget implements Callable {
 					JOptionPane.showMessageDialog(null,"Incorrect Password",null,
 	                        JOptionPane.ERROR_MESSAGE);//$NON-NLS-1$
 					
-					ActivateSecurity.getInstance().log("PkiPasswordGrabberWidget NO KEYSTORE FOUND");
+					ActivateSecurity.getInstance().log("PKI Dialog - NO KEYSTORE FOUND");//$NON-NLS-1$
 					
 					System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
 					pword.setText("");//$NON-NLS-1$
 					
 				} else {
-					ActivateSecurity.getInstance().log("PkiPasswordGrabberWidget Return pw");
 					
 					publishPasswordUpdate.publishMessage(pw);
 					
