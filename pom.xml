@@ -14,7 +14,7 @@
 
 	<properties>
 		<top.dir>${maven.multiModuleProjectDirectory}</top.dir>
-		
+
 	</properties>
 
 
@@ -62,6 +62,23 @@
 					<configuration>
 						<!-- <skip>true</skip> -->
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-packaging-plugin</artifactId>
+					<version>${tycho.version}</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<id>package-feature</id>
+							<configuration>
+								<strictBinIncludes>false</strictBinIncludes>
+        						<format>'rev${rev}-'yyyyMMdd-HHmm</format>
+								<finalName>
+									${project.artifactId}_${buildQualifier}</finalName>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>

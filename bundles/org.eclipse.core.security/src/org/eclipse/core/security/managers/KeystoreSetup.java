@@ -45,7 +45,12 @@ import org.eclipse.core.security.util.PKIProperties;
 import org.eclipse.core.security.managers.KeyStoreManager;
 import org.eclipse.core.security.managers.ConfigureTrust;
 
+import org.osgi.framework.BundleContext;
+//import org.eclipse.ecf.core.security.SSLContextFactory;
+//import org.eclipse.ecf.internal.provider.filetransfer.httpclientjava.ECFHttpClientFactory;
+
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.Activate;
@@ -56,11 +61,14 @@ import org.osgi.framework.ServiceReference;
  *   This class checks the keystore type that have been input and ensure they match 
  */
 
+//@Component(scope=ServiceScope.SINGLETON, immediate=true, configurationPolicy=ConfigurationPolicy.REQUIRE)
 @Component(scope=ServiceScope.SINGLETON)
 public class KeystoreSetup {
-	static boolean isPkcs11Installed = false;
-	static boolean isKeyStoreLoaded = false;
-	
+	boolean isPkcs11Installed = false;
+	boolean isKeyStoreLoaded = false;
+	@Reference
+	//private ComponentContext context;
+	private BundleContext context;
 	Properties pkiProperties = null;
 	SSLContext sslContext = null;
 	
@@ -70,13 +78,24 @@ public class KeystoreSetup {
 	@Reference ConfigureTrust configureTrust;
 	@Reference X509SecurityStateIfc x509SecurityStateIfc;
 	@Reference IncomingSystemPropertyIfc incomingSystemPropertyIfc;
-	protected static KeyStore keyStore = null;
-	private static final int DIGITAL_SIGNATURE = 0;
-	private static final int KEY_CERT_SIGN = 5;
-	private static final int CRL_SIGN = 6;
+	//@ServiceDependency(required=true)
+	//SSLContextFactory sSLContextFactory;
+	//@Reference ECFHttpClientFactory eCFHttpClientFactory;
+	protected  KeyStore keyStore = null;
+	
+	private final int DIGITAL_SIGNATURE = 0;
+	private final int KEY_CERT_SIGN = 5;
+	private final int CRL_SIGN = 6;
 	
 	
 	public KeystoreSetup() {}
+	
+	@Activate
+	//public void activate(ComponentContext componentContext) {
+	public void activate(BundleContext context) {
+		this.context = context;
+	}
+	
 	public void installKeystore() {
 		Optional<KeyStore> keystoreContainer = null;
 		try {
@@ -149,21 +168,43 @@ public class KeystoreSetup {
 	public void activateSecureContext( KeyManager[] km, TrustManager[] tm ) {
 		try {
 			
-			SSLContext ctx = SSLContext.getInstance("TLS");//$NON-NLS-1$
+			SSLContext ctx = SSLContext.getInstance("TLSv1.3");//$NON-NLS-1$
 			
 			ctx.init(km, tm, null);
 			SSLContext.setDefault(ctx);
+			ActivateSecurity.getInstance().log("SSLContext NAME:"+SSLContext.getDefault().getProvider().getName()); //$NON-NLS-1$
 			HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
 			setSSLContext(ctx);
 			pKIProperties = new PKIProperties();
 			pKIProperties.load();
 			//ActivateSecurity.getInstance().setSSLContext(ctx);
+			SSLContext.getDefault().getProvider().getName();
 			setUserEmail();
 			ActivateSecurity.getInstance().log("SSLContext has been configured with SSLContext default."); //$NON-NLS-1$
 			System.setProperty("javax.net.ssl.keyStoreProvider", "SunJSSE");//$NON-NLS-1$ //$NON-NLS-2$
 			
-			ActivateSecurity.getInstance().log("SSLContext PRovider has been set."); //$NON-NLS-1$
 			
+			try {
+//				Object providerService = context.getServiceReference(“serviceName”);
+//				Class serviceClass = providerService.getClass();
+//				Method serviceMethod = serviceClass.getMethod(“methodName”);
+//				Object result = serviceMethod.invoke(providerService);
+				if ( this.context == null ) {
+					ActivateSecurity.getInstance().log("Context null"); //$NON-NLS-1$
+				}
+				
+//				if ( eCFHttpClientFactory == null ) {
+//					//FrameworkUtil.getBundle((SSLContextFactory.getClass()).getBundleContext() );
+//					
+//					eCFHttpClientFactory = new ECFHttpClientFactory();
+//					ActivateSecurity.getInstance().log("SSLContext ECF factory null"); //$NON-NLS-1$
+//				}
+//				eCFHttpClientFactory.newClient();
+				ActivateSecurity.getInstance().log("SSLContextFactory has been set."); //$NON-NLS-1$
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		} catch (KeyManagementException e) {
 			ActivateSecurity.getInstance().log("KeystoreSetup - A KeyManagement error occured:"+e.getMessage());
@@ -220,7 +261,7 @@ public class KeystoreSetup {
 		}
 	}
 
-	private static boolean isDigitalSignature(boolean[] ba) {
+	private boolean isDigitalSignature(boolean[] ba) {
 		if (ba != null) {
 			return ba[DIGITAL_SIGNATURE] && !ba[KEY_CERT_SIGN] && !ba[CRL_SIGN];
 		} else {
