@@ -38,7 +38,7 @@ public class SecurityComponent {
 	public void bindSecurityService(SecurityComponentIfc securityComponentIfc) {
 		securityComponentIfc=securityComponentIfc;
 		Optional stateContainer = Optional.ofNullable(System.getProperty("core.state"));
-		if ( stateContainer.isEmpty()) {
+		if (!(stateContainer.isPresent())) {
 			System.setProperty("core.state", "running");
 		}
 	}

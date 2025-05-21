@@ -124,35 +124,31 @@ public class PKIProperties extends Authenticator {
 		Optional<String> keyStore = null;
 		Optional<String> keyStorePassword = null;
 		Optional<String> keyStoreProvider = null;
+		
+		this.setKeyStore("");//$NON-NLS-1$
+		this.setKeyStoreType("");//$NON-NLS-1$
+		this.setKeyStoreProvider(""); //$NON-NLS-1$
+		this.setKeyStorePassword(""); //$NON-NLS-1$
+		
 		keyStore = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStore")); //$NON-NLS-1$
-		if (keyStore.isEmpty()) {
-			this.setKeyStore(""); //$NON-NLS-1$
-		} else {
+		if (keyStore.isPresent()) {
 			this.setKeyStore(keyStore.get().toString());
 		}
 
 		keyStoreType = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
-		if (keyStoreType.isEmpty()) {
-			this.setKeyStoreType(""); //$NON-NLS-1$
-		} else {
+		if (keyStoreType.isPresent()) {
 			this.setKeyStoreType(keyStoreType.get().toString());
 		}
 		keyStoreProvider = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreProvider")); //$NON-NLS-1$
-		if (keyStoreProvider.isEmpty()) {
-			this.setKeyStoreProvider(""); //$NON-NLS-1$
-		} else {
+		if (keyStoreProvider.isPresent()) {
 			this.setKeyStoreProvider(keyStoreType.get().toString());
 			if (this.getKeyStoreType().equalsIgnoreCase("pkcs12")) {//$NON-NLS-1$
 				System.clearProperty("javax.net.ssl.keyStoreProvider"); //$NON-NLS-1$
 				this.setKeyStoreProvider(""); //$NON-NLS-1$
 			}
 		}
-
-
 		keyStorePassword = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword")); //$NON-NLS-1$
-		if (keyStoreType.isEmpty()) {
-			this.setKeyStorePassword(""); //$NON-NLS-1$
-		} else {
+		if (keyStoreType.isPresent()) {
 			this.setKeyStorePassword(keyStorePassword.get().toString());
 		}
 

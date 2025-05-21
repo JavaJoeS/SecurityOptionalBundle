@@ -50,7 +50,7 @@ public class ActivateSecurity implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		this.context=context;
 		Optional<String> stateOp = Optional.ofNullable(System.getProperty("core.state"));
-		if (stateOp.isEmpty()) {
+		if (!(stateOp.isPresent())) {
 			System.setProperty("core.state", "tracking");//$NON-NLS-1$ //$NON-NLS-2$
 			securityService = context.registerService(SecurityComponentIfc.class, new SecurityFileSnapshot(), null );
 			tracker = new ServiceTracker(context, SecurityComponentIfc.class.getName(), null);
