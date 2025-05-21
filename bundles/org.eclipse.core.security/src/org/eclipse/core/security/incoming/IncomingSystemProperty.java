@@ -47,7 +47,7 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 		
 		type = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
 		try {
-			if (type.isEmpty()) {
+			if (!(type.isPresent())) {
 				ActivateSecurity.getInstance().log("Continue without javax.net.ssl.keyStoreType.");//$NON-NLS-1$
 				x509SecurityStateIfc.setTrustOn(true);
 				return true;
@@ -81,20 +81,15 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 		}
 		
 		keyStore = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStore")); //$NON-NLS-1$
-		if (keyStore.isEmpty()) {
+		if (!(keyStore.Present())) {
 			x509SecurityStateIfc.setPKCS11on(false);
 			x509SecurityStateIfc.setPKCS12on(false);
 		}
 		keyStorePassword = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword")); //$NON-NLS-1$
-		if (keyStorePassword.isEmpty()) {
-			//ActivateSecurity.getInstance().log("A Keystore Password is required, javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
-			//return false;
-		} else {
+		if (keyStorePassword.isPresent()) {
 			PasswordDecrypted = Optional.ofNullable(System.getProperty("javax.net.ssl.decryptedPassword")); //$NON-NLS-1$
 			PasswordEncrypted = Optional.ofNullable(System.getProperty("javax.net.ssl.encryptedPassword")); //$NON-NLS-1$
-			if ((PasswordEncrypted.isEmpty()) || (!(PasswordDecrypted.isEmpty()))) {
-				// Password is not encrypted
-			} else {
+			if ((PasswordEncrypted.isPresent()) || ((PasswordDecrypted.isPresent()))) {
 				if (PasswordEncrypted.get().toString().equalsIgnoreCase("true")) { //$NON-NLS-1$
 					salt = new String(System.getProperty("user.name") + pin).getBytes(); //$NON-NLS-1$
 					String passwd = normalizeGCM.decrypt(keyStorePassword.get().toString(), pin,
@@ -114,7 +109,7 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 		}
 		
 		type = Optional.ofNullable(System.getProperty("javax.net.ssl.trustStoreType")); //$NON-NLS-1$
-		if (type.isEmpty()) {
+		if (!(type.isPresent())) {
 			ActivateSecurity.getInstance().log("No incoming javax.net.ssl.trustStoreType."); //$NON-NLS-1$
 			x509SecurityStateIfc.setTrustOn(false);
 			return false;
@@ -128,12 +123,12 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 		Optional<String> trustStore = null;
 		Optional<String> trustStorePassword = null;
 		trustStore = Optional.ofNullable(System.getProperty("javax.net.ssl.trustStore")); //$NON-NLS-1$
-		if (trustStore.isEmpty()) {
+		if (!(trustStore.isPresent())) {
 			ActivateSecurity.getInstance().log("No truststore is set, javax.net.ssl.trustStore."); //$NON-NLS-1$
 			return false;
 		}
 		trustStorePassword = Optional.ofNullable(System.getProperty("javax.net.ssl.trustStorePassword")); //$NON-NLS-1$
-		if (trustStorePassword.isEmpty()) {
+		if (!(trustStorePassword.isPresent())) {
 			ActivateSecurity.getInstance().log("A truststore Password is required, javax.net.ssl.trustStorePassword."); //$NON-NLS-1$
 			return false;
 		}

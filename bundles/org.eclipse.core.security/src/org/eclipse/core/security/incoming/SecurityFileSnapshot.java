@@ -100,7 +100,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 	public SecurityFileSnapshot() {
 		instanceNo = instanceCounter.incrementAndGet();
 		Optional op = Optional.ofNullable(System.getProperty("core.state"));
-		if ( !( op.isEmpty())) {
+		if ( op.isPresent()) {
 			if (op.get().equals("running")) {
 				startup();
 			}
@@ -112,9 +112,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 			x509SecurityStateIfc=new X509SecurityState();
 		}
 		Optional<String>op = Optional.ofNullable(System.getProperty("core.state"));
-		if ( op.isEmpty()) {
-			return;
-		} else {
+		if ( op.isPresent()) {
 			if (!(op.get().equals("loaded"))) {
 				if ( image() ) {
 					System.setProperty("core.state", "inprocess");
@@ -133,7 +131,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 		 */
 		try {
 			Optional<Boolean> eclipseHome = Optional.ofNullable(Files.exists(Paths.get(USER_HOME))); // $NON-NLS-1$
-			if (!(eclipseHome.isEmpty())) {
+			if (eclipseHome.isPresent()) {
 				if (Files.exists(Paths.get(USER_HOME + FileSystems.getDefault().getSeparator() + DotEclipse
 						+ FileSystems.getDefault().getSeparator() + ".pki"))) {
 					
@@ -174,7 +172,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 	}
 	public boolean createPKI() {
 		Optional<Boolean> eclipseHome = Optional.ofNullable(Files.exists(Paths.get(USER_HOME))); // $NON-NLS-1$
-		if (!(eclipseHome.isEmpty())) {
+		if (eclipseHome.isPresent()) {
 			if (!(Files.exists(Paths.get(USER_HOME + FileSystems.getDefault().getSeparator() + DotEclipse
 					+ FileSystems.getDefault().getSeparator() + ".pki")))) {
 				String pkiFileFQN=USER_HOME + FileSystems.getDefault().getSeparator() + DotEclipse
@@ -227,17 +225,17 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 					.ofNullable(properties.getProperty("javax.net.ssl.keyStorePassword")); //$NON-NLS-1$
 			Optional<String> encryptedPasswd = Optional
 					.ofNullable(properties.getProperty("javax.net.ssl.encryptedPassword")); //$NON-NLS-1$
-			if (passwdContainer.isEmpty()) {
+			if (!(passwdContainer.isPresent())) {
 				Optional<String> keyStoreContainer = Optional.ofNullable(
 						properties.getProperty("javax.net.ssl.keyStore")); //$NON-NLS-1$
-				if (!(keyStoreContainer.isEmpty() )) {
+				if (keyStoreContainer.isPresent() ) {
 					System.setProperty("javax.net.ssl.keyStore", keyStoreContainer.get().toString().trim());
 				} else {
 					return null;
 				}
 				Optional<String> keyStoreTypeContainer = Optional.ofNullable(
 						properties.getProperty("javax.net.ssl.keyStoreType")); //$NON-NLS-1$
-				if (!(keyStoreTypeContainer.isEmpty() )) {
+				if (keyStoreTypeContainer.isPresent() ) {
 					
 					String keyStoreType = keyStoreTypeContainer.get().toString().trim();
 					if (keyStoreType.equalsIgnoreCase("PKCS12" )) { //$NON-NLS-1$
@@ -248,7 +246,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 							try {
 								Optional<String> testKeyContainer = Optional.ofNullable(
 										System.getProperty("core.key"));
-								if (!(testKeyContainer.isEmpty() ))  {
+								if (testKeyContainer.isPresent() )  {
 									String testKey = testKeyContainer.get().toString().trim();
 									if (testKey.equalsIgnoreCase("eclipse.core.pki.testing")) {
 										return properties;
@@ -271,7 +269,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 							String returnedValue=null;
 							try {
 								es.submit(() -> {
-										System.out.println(" executed by " + Thread.currentThread().getName());
+										System.out.println(" Get a Password: " + Thread.currentThread().getName());
 						                try {
 						                	final Future<String> future = (Future<String>) runner.call();
 						                	future.get();
@@ -298,7 +296,7 @@ public class SecurityFileSnapshot implements SecurityComponentIfc {
 					}
 				}
 			} else {
-				if ((encryptedPasswd.isEmpty()) && (!(passwdContainer.isEmpty()))) {
+				if ((!(encryptedPasswd.isPresent())) && (passwdContainer.isPresent())) {
 
 					properties.setProperty("javax.net.ssl.encryptedPassword", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 					passwd = passwdContainer.get();
