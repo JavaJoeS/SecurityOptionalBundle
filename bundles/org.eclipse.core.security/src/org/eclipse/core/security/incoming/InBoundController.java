@@ -81,11 +81,9 @@ public class InBoundController {
 
 	public void controller() {
 		Optional<String> keystoreTypeContainer = null;
-		Optional<String> decryptedPw;
 		
 		//ActivateSecurity.getInstance().log("InBoundController controller."); //$NON-NLS-1$
-		
-		
+			
 		/*
 		 * First see if parameters were passed into eclipse via the command line -D
 		 */
@@ -93,13 +91,13 @@ public class InBoundController {
 
 		Optional<String> testKeyContainer = Optional.ofNullable(
 				System.getProperty("core.key"));
-		if (!(testKeyContainer.isEmpty() ))  {
+		if (testKeyContainer.isPresent() )  {
 			String testKey = testKeyContainer.get().toString().trim();
 			if (testKey.equalsIgnoreCase("eclipse.core.pki.testing")) {
 				return;
 			}
 		}
-		if (keystoreTypeContainer.isEmpty()) {
+		if (!(keystoreTypeContainer.isPresent())) {
 			ActivateSecurity.getInstance().log("InBoundController controller NO KEYSTORE TYPE."); //$NON-NLS-1$
 			//
 			// Incoming parameter as -DkeystoreType was empty so CHECK in .pki file

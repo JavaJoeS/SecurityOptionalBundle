@@ -72,7 +72,7 @@ public class PkiPasswordGrabberWidget implements Callable {
 	}
 
 	public String getInput() {
-
+		ActivateSecurity.getInstance().log("PkiPasswordGrabberWidgetPKI - getInput");//$NON-NLS-1$
 		Optional keystoreContainer = null;		
 		JPanel panel = new JPanel();
 		JLabel label = new JLabel("Enter Password:");//$NON-NLS-1$
@@ -120,7 +120,8 @@ public class PkiPasswordGrabberWidget implements Callable {
 						.ofNullable(keyStoreManager.getKeyStore(System.getProperty("javax.net.ssl.keyStore"), //$NON-NLS-1$
 								System.getProperty("javax.net.ssl.keyStorePassword"), //$NON-NLS-1$
 								System.getProperty("javax.net.ssl.keyStoreType"))); //$NON-NLS-1$
-				if ((keystoreContainer.isEmpty()) || (!(keyStoreManager.isKeyStoreInitialized()))) {
+				
+				if (!(keystoreContainer.isPresent()) || (!(keyStoreManager.isKeyStoreInitialized()))) {
 					JOptionPane.showMessageDialog(null,"Incorrect Password",null,
 	                        JOptionPane.ERROR_MESSAGE);//$NON-NLS-1$
 					
@@ -130,7 +131,7 @@ public class PkiPasswordGrabberWidget implements Callable {
 					pword.setText("");//$NON-NLS-1$
 					
 				} else {
-					
+					ActivateSecurity.getInstance().log("PkiPasswordGrabberWidgetPKI GOT password");
 					publishPasswordUpdate.publishMessage(pw);
 					
 					break;

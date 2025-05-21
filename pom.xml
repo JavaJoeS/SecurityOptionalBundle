@@ -14,7 +14,7 @@
 
 	<properties>
 		<top.dir>${maven.multiModuleProjectDirectory}</top.dir>
-
+		<target-file-name>security</target-file-name>
 	</properties>
 
 
@@ -156,13 +156,16 @@
 							</requirement>
 						</extraRequirements>
 					</dependency-resolution>
+					<!--
 					<target>
 						<artifact>
 							<groupId>org.eclipse.core.security</groupId>
 							<artifactId>target-platform</artifactId>
-							<version>1.0.4-SNAPSHOT</version>
+							<version>${project.version}</version>
+							<classifier>${target-file-name}</classifier>
 						</artifact>
-					</target>
+					</target>-->
+					
 					<environments>
 						<environment>
 							<os>linux</os>

@@ -58,7 +58,7 @@ public class DotPkiPropertiesRequired {
 			    	return true;
 			    } else {
 			    	Optional<Object> pkiType = Optional.ofNullable(properties.get("javax.net.ssl.keyStoreType"));
-			    	if ( !(pkiType.isEmpty())) {
+			    	if (pkiType.isPresent()) {
 			    		if (pkiType.get().toString().contains("12")) { //PKCS12 type. no cfg needed, no provider needed
 			    			isProperty("javax.net.ssl.cfgFileLocation");
 			    			isProperty("javax.net.ssl.keyStoreProvider");

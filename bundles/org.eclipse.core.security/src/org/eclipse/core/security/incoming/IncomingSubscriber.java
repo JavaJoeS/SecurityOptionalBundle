@@ -85,12 +85,20 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 						String pkcs11Pin = "";//$NON-NLS-1$
 						
 						decryptedPw = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStorePassword"));
-						if (!decryptedPw.isEmpty()) {
+						if (decryptedPw.isPresent()) {
 							pkcs11Pin = decryptedPw.get();
 						}
 						keystoreContainer = Optional
 								.ofNullable(authenticationBase.initialize(pkcs11Pin.toCharArray()));// $NON-NLS-1$
-						if (keystoreContainer.isEmpty()) {
+						if (keystoreContainer.isPresent()) {
+							ActivateSecurity.getInstance().log("A Keystore and Password are detected."); //$NON-NLS-1$
+							keyStore = keystoreContainer.get();
+							if ( keyStore != null )
+								keyStoreManager.setKeyStore(keyStore);
+								//ActivateSecurity.getInstance().setKeyStoreLoaded(true);
+								keystoreSetup.setPkiContext();
+							}	
+						} else {
 							ActivateSecurity.getInstance().log("Failed to Load a Keystore."); //$NON-NLS-1$
 							x509SecurityStateIfc.setPKCS11on(false);
 							System.clearProperty("javax.net.ssl.keyStoreType"); //$NON-NLS-1$
@@ -98,13 +106,8 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 							System.clearProperty("javax.net.ssl.keyStoreProvider"); //$NON-NLS-1$
 							System.clearProperty("javax.net.ssl.keyStorePassword"); //$NON-NLS-1$
 							securityFileSnapshot.restoreProperties();
-						} else {
-							ActivateSecurity.getInstance().log("A Keystore and Password are detected."); //$NON-NLS-1$
-							keyStore = keystoreContainer.get();
-							keyStoreManager.setKeyStore(keyStore);
-							//ActivateSecurity.getInstance().setKeyStoreLoaded(true);
-							keystoreSetup.setPkiContext();
 						}
+						
 					}
 				}
 			}

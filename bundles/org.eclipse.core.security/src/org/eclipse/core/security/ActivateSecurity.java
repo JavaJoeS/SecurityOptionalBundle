@@ -36,6 +36,7 @@ public class ActivateSecurity implements BundleActivator {
 	private BundleContext context;
 	ServiceRegistration <SecurityComponentIfc>securityService;
 	ServiceTracker tracker;
+	public boolean isPkiUp=false;
 	
 	
 	private static final ServiceCaller<ILog> logger = new ServiceCaller(ActivateSecurity.class, ILog.class);
@@ -82,4 +83,13 @@ public class ActivateSecurity implements BundleActivator {
 	public BundleContext getContext() {
 		return context;
 	}
+
+	public boolean isPkiUp() {
+		return isPkiUp;
+	}
+
+	public void setPkiUp(boolean isPkiUp) {
+		this.isPkiUp = isPkiUp;
+	}
+	
 }

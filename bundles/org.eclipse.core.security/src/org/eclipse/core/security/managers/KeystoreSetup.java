@@ -167,22 +167,26 @@ public class KeystoreSetup {
 	}
 	public void activateSecureContext( KeyManager[] km, TrustManager[] tm ) {
 		try {
-			
-			SSLContext ctx = SSLContext.getInstance("TLSv1.3");//$NON-NLS-1$
+			Provider provider = Security.getProvider("SunJSSE");
+			SSLContext ctx = SSLContext.getInstance("TLSv1.3", provider);//$NON-NLS-1$
 			
 			ctx.init(km, tm, null);
+			
 			SSLContext.setDefault(ctx);
+			
 			ActivateSecurity.getInstance().log("SSLContext NAME:"+SSLContext.getDefault().getProvider().getName()); //$NON-NLS-1$
 			HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
 			setSSLContext(ctx);
 			pKIProperties = new PKIProperties();
 			pKIProperties.load();
+			ActivateSecurity.getInstance().setPkiUp(true);
 			//ActivateSecurity.getInstance().setSSLContext(ctx);
-			SSLContext.getDefault().getProvider().getName();
-			setUserEmail();
-			ActivateSecurity.getInstance().log("SSLContext has been configured with SSLContext default."); //$NON-NLS-1$
-			System.setProperty("javax.net.ssl.keyStoreProvider", "SunJSSE");//$NON-NLS-1$ //$NON-NLS-2$
+			//SSLContext.getDefault().getProvider().getName();
 			
+			setUserEmail();
+			ActivateSecurity.getInstance().log("SSLContext has been configured with SSLContext default.PROTO:"+SSLContext.getDefault().getProtocol()); //$NON-NLS-1$
+			System.setProperty("javax.net.ssl.keyStoreProvider", "SunJSSE");//$NON-NLS-1$ //$NON-NLS-2$
+			//getProviderList();
 			
 			try {
 //				Object providerService = context.getServiceReference(“serviceName”);
@@ -269,11 +273,11 @@ public class KeystoreSetup {
 		}
 	}
 
-	void getProviderList() {
+	public void getProviderList() {
 		try {
 		      Provider providers[] = Security.getProviders();
 		      for(Provider p : providers) {
-		    	  System.out.println(p.getName()+ "|" + p.getInfo());
+		    	  ActivateSecurity.getInstance().log(p.getName()+ "|" + p.getInfo());
 		       }
 		    } catch (Exception e) {
 		      System.out.println(e);
