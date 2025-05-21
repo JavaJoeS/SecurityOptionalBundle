@@ -59,6 +59,7 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 	public void publishedIncoming() {
 		Optional<String> keystoreTypeContainer = null;
 		Optional<String> decryptedPw;
+		
 		if ( incomingSystemPropertyIfc == null ) {
 			incomingSystemPropertyIfc = new IncomingSystemProperty();
 		}
@@ -110,7 +111,6 @@ public class IncomingSubscriber implements  IncomingSubscriberIfc {
 						
 					}
 				}
-			}
 		} catch (Exception e) {
 			ActivateSecurity.getInstance().log("Invalid properties have been set:"+e.getMessage());
 		}

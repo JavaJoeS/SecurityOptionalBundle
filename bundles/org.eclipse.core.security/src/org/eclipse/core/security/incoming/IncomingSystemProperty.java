@@ -81,7 +81,7 @@ public class IncomingSystemProperty implements IncomingSystemPropertyIfc {
 		}
 		
 		keyStore = Optional.ofNullable(System.getProperty("javax.net.ssl.keyStore")); //$NON-NLS-1$
-		if (!(keyStore.Present())) {
+		if (!(keyStore.isPresent())) {
 			x509SecurityStateIfc.setPKCS11on(false);
 			x509SecurityStateIfc.setPKCS12on(false);
 		}
