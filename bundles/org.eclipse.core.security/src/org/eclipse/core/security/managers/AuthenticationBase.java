@@ -68,9 +68,7 @@ public class AuthenticationBase implements AuthenticationService {
 		try {
 			
 			Optional<KeyStore>keyStoreContainer = Optional.ofNullable(configure());
-			if (keyStoreContainer.isEmpty() ) {
-				return null;
-			} else {
+			if (keyStoreContainer.isPresent() ) {
 				keyStore=keyStoreContainer.get();
 			}
 			try {
@@ -117,13 +115,12 @@ public class AuthenticationBase implements AuthenticationService {
 		KeyStore keyStore = null;
 		String errorMessage=null;
 		is9 = true;
-
+		
+		// Where is the pkcs11 config file for Windoz
+		// Set the default value and over ride if present
+		setCfgDirectory(new String("/etc/opensc")); //$NON-NLS-1$
 		configurationDirectory = Optional.ofNullable(System.getProperty("javax.net.ssl.cfgFileLocation")); //$NON-NLS-1$
-		if (configurationDirectory.isEmpty()) {
-			// Where is it for Windoz
-			//TBD:  find default setting
-			setCfgDirectory(new String("/etc/opensc")); //$NON-NLS-1$
-		} else {
+		if (configurationDirectory.isPresent()) {
 			setCfgDirectory(configurationDirectory.get().toString());
 		}
 
@@ -131,9 +128,9 @@ public class AuthenticationBase implements AuthenticationService {
 			ActivateSecurity.getInstance().log("PKCS11 configure  DIR:" + getCfgDirectory()); //$NON-NLS-1$
 			providerContainer=Optional.ofNullable(
 							System.getProperty("javax.net.ssl.keyStoreProvider")); //$NON-NLS-1$
-			if (providerContainer.isEmpty() ) {
-				securityProvider = pkiProvider;
-			} else {
+			// Set the default provider value and over ride if a property is present
+			securityProvider = pkiProvider;
+			if (providerContainer.isPresent() ) {
 				securityProvider = providerContainer.get().toString();
 			}
 			prototype = Security.getProvider(securityProvider);
@@ -161,7 +158,7 @@ public class AuthenticationBase implements AuthenticationService {
 				errorMessage=e.getMessage()+" No PKCS11 Configuration found.";
 			}
 			Optional<String> errorContainer = Optional.ofNullable(errorMessage);
-			if ( !(errorContainer.isEmpty())) {
+			if ( errorContainer.isPresent()) {
 				Security.removeProvider(providerName);
 				ActivateSecurity.getInstance().log(errorMessage); //$NON-NLS-1$
 			}
@@ -192,16 +189,15 @@ public class AuthenticationBase implements AuthenticationService {
 			sslContext = SSLContext.getInstance("TLSv1.3"); //$NON-NLS-1$
 			
 			Optional<X509TrustManager> PKIXtrust = configureTrust.setUp();
-			if (PKIXtrust.isEmpty()) {
-				ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
-			} else {
-				
+			if (PKIXtrust.isPresent()) {
 				KeyManager[] km = new KeyManager[] { keyStoreManager };
 				TrustManager[] tm = new TrustManager[] { configureTrust };
 				
 				sslContext.init(km, tm, new SecureRandom());
 				SSLContext.setDefault(sslContext);
 				HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+			} else {
+				ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$	
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

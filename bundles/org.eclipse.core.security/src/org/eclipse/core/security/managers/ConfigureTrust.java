@@ -49,30 +49,29 @@ public class ConfigureTrust implements X509TrustManager {
 		String passwd = "changeit"; //$NON-NLS-1$
 		try {
 			Optional<String> trustStoreFile = Optional.ofNullable(System.getProperty("javax.net.ssl.trustStore")); //$NON-NLS-1$
-			if (trustStoreFile.isEmpty()) {
+			if (trustStoreFile.isPresent()) {
+				storeLocation = trustStoreFile.get().toString();
+			} else {
 				storeLocation = System.getProperty("java.home") + //$NON-NLS-1$
 						"/lib/security/cacerts" //$NON-NLS-1$
 								.replace("/", FileSystems.getDefault().getSeparator()); //$NON-NLS-1$
-			} else {
-				storeLocation = trustStoreFile.get().toString();
 			}
 			InputStream fs = Files.newInputStream(Paths.get(storeLocation));
 			
 			Optional<String> trustStoreFileType = Optional
 					.ofNullable(System.getProperty("javax.net.ssl.trustStoreType")); //$NON-NLS-1$
-			if (trustStoreFileType.isEmpty()) {
-				trustType = KeyStore.getDefaultType();
-			} else {
+			if (trustStoreFileType.isPresent()) {
 				trustType = trustStoreFileType.get().toString();
+			} else {
+				trustType = KeyStore.getDefaultType();		
 			}
 			keyStore = KeyStore.getInstance(trustType);
 
+			//  Set the TrustStore default well known value set and over ride if property present
 			Optional<String> trustStorePassword = Optional
 					.ofNullable(System.getProperty("javax.net.ssl.trustStorePassword")); //$NON-NLS-1$
-			if (trustStorePassword.isEmpty()) {
-				ActivateSecurity.getInstance().log("ConfigureTrust using default Password since none provided."); //$NON-NLS-1$
-				passwd="changeit";
-			} else {
+			if (trustStorePassword.isPresent()) {
+				ActivateSecurity.getInstance().log("ConfigureTrust using Provided Password from property."); //$NON-NLS-1$
 				passwd = trustStorePassword.get().toString();
 			}
 

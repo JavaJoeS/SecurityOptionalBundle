@@ -110,7 +110,7 @@ public class KeystoreSetup {
 							System.getProperty("javax.net.ssl.keyStorePassword"), //$NON-NLS-1$
 							System.getProperty("javax.net.ssl.keyStoreType"))); //$NON-NLS-1$
 
-			if ((keystoreContainer.isEmpty()) || (!(keyStoreManager.isKeyStoreInitialized()))) {
+			if ((!(keystoreContainer.isPresent())) || (!(keyStoreManager.isKeyStoreInitialized()))) {
 				ActivateSecurity.getInstance().log("Failed to Load a Keystore."); //$NON-NLS-1$
 				x509SecurityStateIfc.setPKCS12on(false);
 				System.clearProperty("javax.net.ssl.keyStoreType"); //$NON-NLS-1$
@@ -140,7 +140,7 @@ public class KeystoreSetup {
 			if ((incomingSystemPropertyIfc.checkTrustStore())) {
 				x509SecurityStateIfc.setTrustOn(true);
 				Optional<X509TrustManager> PKIXtrust = configureTrust.setUp();
-				if (PKIXtrust.isEmpty()) {
+				if (!(PKIXtrust.isPresent())) {
 					ActivateSecurity.getInstance().log("Invalid TrustManager Initialization."); //$NON-NLS-1$
 					return;
 				}
