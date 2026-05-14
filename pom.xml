@@ -5,16 +5,19 @@
 	<parent>
 		<groupId>org.eclipse</groupId>
 		<artifactId>security-parent</artifactId>
-		<version>2.0.0-SNAPSHOT</version>
+		<version>2.0.0</version>
 	</parent>
 
 	<groupId>org.eclipse</groupId>
 	<artifactId>securityoption</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>5.0.5-SNAPSHOT</version>
 
 	<properties>
 		<top.dir>${maven.multiModuleProjectDirectory}</top.dir>
 		<target-file-name>security</target-file-name>
+		<releaseVersion>1.9.0</releaseVersion>
+		<qualifier>-SNAPSHOT</qualifier>
+		<thisVersion>5.0.5</thisVersion>
 	</properties>
 
 
@@ -23,17 +26,19 @@
 			<id>eclipse-project-orbit</id>
 			<layout>p2</layout>
 			<url>
-				https://download.eclipse.org/tools/orbit/downloads/drops/R20230531010532/repository</url>
+				 https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/release/4.39.0
+<!--				https://download.eclipse.org/tools/orbit/downloads/drops/R20230531010532/repository-->
+			</url>
 		</repository>
 		<repository>
 			<id>eclipse-project-updates</id>
 			<layout>p2</layout>
-			<url>https://download.eclipse.org/eclipse/updates/4.35</url>
+			<url>https://download.eclipse.org/eclipse/updates/4.39</url>
 		</repository>
 		<repository>
-			<id>eclipse-project-2025-03</id>
+			<id>eclipse-project-2026-03</id>
 			<layout>p2</layout>
-			<url>https://download.eclipse.org/releases/2025-03</url>
+			<url>https://download.eclipse.org/releases/2026-03</url>
 		</repository>
 
 		<!--<repository>
@@ -49,6 +54,21 @@
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-versions-plugin</artifactId>
 					<version>${tycho.version}</version>
+					<configuration>
+						<newVersion>${thisVersion}</newVersion>
+<!--                		<strictVersions>true</strictVersions>-->
+                		<modules>bundles features products updatesite</modules>
+            		</configuration>
+            		<executions>
+            			<execution>
+            				<id>attach-artifacts</id>
+          					<phase>verify</phase>
+					        <goals>
+					        	<goal>bump-versions</goal>
+					        	<goal>set-version</goal>
+					        </goals>
+            			</execution>
+            		</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
@@ -58,7 +78,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>3.1.3</version>
+					<version>3.1.4</version>
 					<configuration>
 						<!-- <skip>true</skip> -->
 					</configuration>
@@ -214,7 +234,7 @@
 
 	<profiles>
 		<profile>
-			<id>default-snapshot</id>
+			<id>snapshot</id>
 			<!--
 			<modules>
 				<module>p2site</module>
@@ -225,7 +245,9 @@
 			</activation>
 			<properties>
 				<snapshot>SNAPSHOT</snapshot>
+				<qualifier>-SNAPSHOT</qualifier>
 				<revisionSnapshot>-SNAPSHOT</revisionSnapshot>
+				<thisVersion>${version}</thisVersion>
 			</properties>
 		</profile>
 		<profile>
@@ -236,6 +258,7 @@
 			<properties>
 				<snapshot></snapshot>
 				<revisionSnapshot></revisionSnapshot>
+				<qualifier></qualifier>
 			</properties>
 		</profile>
 	</profiles>
